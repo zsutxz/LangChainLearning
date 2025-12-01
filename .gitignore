@@ -88,6 +88,11 @@ mlruns/
 .env.*.local
 secrets.json
 credentials.json
+*.key
+*.pem
+config/secrets/
+private/
+sensitive/
 
 # Temporary files
 *.tmp
