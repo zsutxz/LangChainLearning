@@ -3,112 +3,167 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## 🎯 Project Overview
-这是一个基于LangGraph构建的智能技术学习助手，能够自动收集指定IT技术的最新资料，进行分析总结，并生成个性化学习方案。使用LangChain作为LLM框架，支持多种API配置。
 
-## 🏗️ 项目架构
+This is a **LangChain and LangGraph learning repository** focused on building intelligent agents and workflows. The repository contains:
 
-### 核心组件架构
+1. **Main Project**: An intelligent technical learning assistant built with LangGraph (in `test/` directory)
+2. **Claude Skills**: Multiple specialized skills for extending Claude's capabilities (in `.claude/skills/`)
+3. **Learning Resources**: Research documents and case studies for AI/ML development (in `langchain/`, `langgraph/` directories)
+
+## 🏗️ Repository Structure
+
+### Core Technical Learning Assistant (`test/`)
+The main project demonstrates LangGraph workflow capabilities:
+
 ```
-langgraph-agent/
-├── main.py                    # 主程序入口 - TechLearningAssistant类，CLI和交互接口
-├── config/settings.py         # 应用配置 - API密钥、模型设置、DeepSeek支持
-├── src/tech_learning_workflow.py  # 工作流引擎 - LangGraph状态管理和流程编排
-├── agents/                    # 智能体模块
-│   ├── research_agent.py      # 研究智能体 - 技术资料收集和分析
-│   └── learning_agent.py      # 学习智能体 - 个性化学习方案生成
-├── tools/                     # 工具模块
-│   ├── web_searcher.py        # 网络搜索 - Google搜索、Arxiv论文、RSS订阅
-│   └── content_analyzer.py    # 内容分析 - 关键概念提取、趋势分析
-├── examples/basic_usage.py    # 使用示例 - 基础、高级、批量、个性化示例
-├── testresearch.py            # 搜索功能测试
-├── testdeepseek.py            # DeepSeek配置测试
-└── requirements.txt           # Python依赖列表
+test/                          # Main LangGraph project directory
+├── main.py                    # Entry point - TechLearningAssistant class with CLI interface
+├── config/settings.py         # Configuration management - API keys, model settings, DeepSeek support
+├── src/tech_learning_workflow.py  # LangGraph workflow engine - state management and process orchestration
+├── agents/                    # AI agent modules
+│   ├── research_agent.py      # Research agent - technology data collection and analysis
+│   └── learning_agent.py      # Learning agent - personalized learning plan generation
+├── tools/                     # Utility tools
+│   ├── web_searcher.py        # Web search - Google search, Arxiv papers, RSS feeds
+│   └── content_analyzer.py    # Content analysis - key concept extraction, trend analysis
+├── examples/basic_usage.py    # Usage examples - basic, advanced, batch, personalized scenarios
+├── testresearch.py            # Search functionality testing
+├── testdeepseek.py            # DeepSeek API configuration testing
+└── requirements.txt           # Python dependencies
 ```
 
-### LangGraph工作流设计
-工作流采用状态机模式，包含以下节点：
-- **validate_input**: 输入参数验证和标准化
-- **research_technology**: 技术资料收集和分析
-- **generate_learning_plan**: 基础学习方案生成
-- **customize_plan**: 个性化定制（可选）
-- **generate_final_output**: 最终结果整合
-- **handle_error**: 错误处理
+### Claude Skills (`.claude/skills/`)
+Multiple specialized skills for extending Claude's capabilities:
+- `ai-news-aggregator/` - AI news collection and summarization
+- `github-ai-projects/` - GitHub AI project discovery and analysis
+- `lead-research-assistant/` - Research automation for business development
+- `skill-creator/` - Meta-skill for creating new Claude skills
+- `template-skill/` - Development template for new skills
+- `translate-it-article/` - Professional IT article translation
+- `code-architecture-analyzer/` - Multi-language project architecture analysis
 
-### 智能体协作模式
-- **ResearchAgent**: 使用WebSearcher和ContentAnalyzer收集技术资料
-- **LearningAgent**: 基于研究结果生成个性化学习方案
-- **状态传递**: 通过WorkflowState在智能体间传递数据
+## ⚙️ Development Environment Setup
 
-## ⚙️ 开发环境配置
+### Prerequisites
+- **Python 3.8+** (async/await support required)
+- **API Keys**: OpenAI (required), Serper (optional for web search)
 
-### 1. 环境变量设置
+### Installation Commands
 ```bash
-# 复制配置模板
-cp .env.example .env
+# Navigate to the main project directory
+cd test/
 
-# 编辑 .env 文件，添加你的API密钥
-OPENAI_API_KEY=your_openai_api_key_here                    # 必需
-SERPER_API_KEY=your_serper_api_key_here                  # 可选，用于Google搜索
-
-# 可选的其他LLM API
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
-```
-
-### 2. 依赖安装
-```bash
-# 创建虚拟环境
+# Create virtual environment
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# 安装依赖
+# Install dependencies
 pip install -r requirements.txt
+
+# Configure environment variables
+cp .env.example .env
+# Edit .env with your API keys
 ```
 
-## 🚀 常用命令
-
-### 基础运行
+### Required Environment Variables (.env)
 ```bash
-# 命令行模式 - 基础用法
+# Required
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Optional for enhanced functionality
+SERPER_API_KEY=your_serper_api_key_here          # For Google web search
+ANTHROPIC_API_KEY=your_anthropic_api_key_here    # Alternative LLM support
+```
+
+### Key Dependencies
+- **langgraph>=0.2.0** - Workflow orchestration and state management
+- **langchain>=0.2.0** - LLM framework
+- **langchain-openai>=0.1.0** - OpenAI integration
+- **langchain-community>=0.2.0** - Community tools and integrations
+- **asyncio, aiohttp** - Async processing for performance
+- **requests, beautifulsoup4** - Web scraping capabilities
+- **python-dotenv** - Environment variable management
+
+## 🚀 Common Development Commands
+
+### Running the Technical Learning Assistant
+```bash
+# Navigate to project directory first
+cd test/
+
+# Basic usage - generate learning plan
 python main.py "Python" --level beginner --hours 30
 
-# 命令行模式 - 个性化偏好
+# Advanced usage with personalization
 python main.py "Machine Learning" --level advanced --hours 60 --preferences '{"learning_style": "hands-on"}'
 
-# 交互模式
+# Interactive mode
 python main.py --interactive
 
-# 保存结果到文件
+# Save results to file
 python main.py "React" --level intermediate --output react_plan.json
 ```
 
-### 开发和测试
+### Testing and Development
 ```bash
-# 运行完整示例（包含所有用法示例）
+# Run comprehensive usage examples
 python examples/basic_usage.py
 
-# 测试搜索功能
+# Test search functionality
 python testresearch.py
 
-# 测试特定功能
+# Test specific LLM configurations
 python testdeepseek.py
+
+# Validate configuration
+python -c "from config.settings import settings; print('Configuration valid:', settings.validate_config())"
 ```
 
-### 配置管理
+### Configuration Management
 ```bash
-# 验证配置
-python -c "from config.settings import settings; print(settings.validate_config())"
+# Verify required API keys are set
+python -c "from config.settings import settings; exit(0 if settings.validate_config() else 1)"
+
+# Enable debug mode for troubleshooting
+export DEBUG=True
+python main.py "Python" --level beginner
 ```
 
-## 📊 核心模块使用
+## 🏛️ Core Architecture Patterns
+
+### LangGraph Workflow Design
+The project uses a **state machine pattern** with these sequential nodes:
+1. **validate_input** - Parameter validation and normalization
+2. **research_technology** - Multi-source data collection and analysis
+3. **generate_learning_plan** - Base learning plan creation using LLM
+4. **customize_plan** - Personalization based on user preferences (optional)
+5. **generate_final_output** - Result integration and formatting
+6. **handle_error** - Comprehensive error handling and recovery
+
+### Agent Collaboration Pattern
+- **ResearchAgent**: Coordinates WebSearcher and ContentAnalyzer for comprehensive data collection
+- **LearningAgent**: Generates personalized learning plans based on research results
+- **State Management**: WorkflowState passes structured data between agents
+
+### Async Processing Pattern
+All components use asyncio for high-performance concurrent operations:
+```python
+async def research_technology(self, technology: str):
+    # Concurrent web search and content analysis
+    results = await self.web_searcher.comprehensive_search(query)
+    analysis = self.content_analyzer.analyze_content(results)
+```
+
+## 📊 Key Components and Usage
 
 ### 1. TechLearningAssistant (main.py:13)
-主要用户接口类，提供完整的学习方案生成功能。
+Primary user interface class providing complete learning plan generation.
 
 ```python
 from main import TechLearningAssistant
 import asyncio
 
-async def create_plan():
+async def create_learning_plan():
     assistant = TechLearningAssistant()
     result = await assistant.create_learning_plan(
         technology="Python",
@@ -124,12 +179,12 @@ async def create_plan():
         assistant.save_result(result)
     return result
 
-# 运行
-result = asyncio.run(create_plan())
+# Execute
+result = asyncio.run(create_learning_plan())
 ```
 
 ### 2. TechLearningWorkflow (src/tech_learning_workflow.py:41)
-LangGraph工作流引擎，管理整个学习方案生成流程。
+LangGraph workflow engine managing the entire learning plan generation process.
 
 ```python
 from src.tech_learning_workflow import TechLearningWorkflow
@@ -143,24 +198,8 @@ result = await workflow.run(
 )
 ```
 
-### 3. WorkflowState (src/tech_learning_workflow.py:28)
-LangGraph状态定义，包含完整的工作流状态管理。
-
-```python
-class WorkflowState(TypedDict):
-    messages: Annotated[list, add_messages]
-    technology: str
-    experience_level: str
-    duration_hours: int
-    preferences: Dict[str, Any]
-    research_results: Optional[Dict[str, Any]]
-    learning_plan: Optional[Dict[str, Any]]
-    error: Optional[str]
-    status: str
-```
-
-### 4. ResearchAgent (agents/research_agent.py:14)
-研究智能体，负责技术资料收集和初步分析。
+### 3. ResearchAgent (agents/research_agent.py:14)
+Research agent responsible for comprehensive technology data collection and analysis.
 
 ```python
 from agents.research_agent import ResearchAgent
@@ -169,8 +208,8 @@ agent = ResearchAgent()
 research_results = await agent.search_technology_info("Docker")
 ```
 
-### 5. WebSearcher (tools/web_searcher.py:16)
-网络搜索工具，支持多种搜索源和内容提取。
+### 4. WebSearcher (tools/web_searcher.py:16)
+Multi-source web search tool supporting Google Search, Arxiv papers, and RSS feeds.
 
 ```python
 from tools.web_searcher import WebSearcher
@@ -178,163 +217,69 @@ from tools.web_searcher import WebSearcher
 async with WebSearcher() as searcher:
     google_results = await searcher.search_google("Python tutorial")
     arxiv_papers = await searcher.search_arxiv("machine learning")
+    rss_content = await searcher.search_rss_feeds("AI news")
 ```
 
-## 🛠️ 开发指南
+## 🔧 Development Patterns
 
-### 扩展搜索源
-在 `tools/web_searcher.py` 中添加新的搜索方法：
-
+### Adding New Search Sources
+Extend the WebSearcher class with new search methods:
 ```python
 async def search_new_source(self, query: str) -> List[Dict[str, Any]]:
-    """添加新的搜索源"""
-    # 实现新搜索源的逻辑
+    """Add new search source implementation"""
+    # Implement new search source logic
     pass
 ```
 
-### 修改学习方案生成逻辑
-在 `agents/learning_agent.py` 中自定义prompt和模板：
-
+### Customizing Learning Plan Generation
+Modify the LearningAgent prompt templates and generation logic:
 ```python
 def generate_learning_plan(self, technology: str, analysis: Dict[str, Any],
                          duration_hours: int = None, experience_level: str = "beginner"):
-    """自定义学习方案生成逻辑"""
-    # 修改prompt模板和生成逻辑
+    """Customize learning plan generation logic"""
+    # Modify prompt templates and generation approach
     pass
 ```
 
-### 扩展工作流
-在 `src/tech_learning_workflow.py` 中添加新的处理节点：
-
+### Extending the LangGraph Workflow
+Add new processing nodes to the workflow:
 ```python
 def _create_workflow(self) -> StateGraph:
-    """扩展工作流"""
+    """Extend workflow with additional processing steps"""
     workflow = StateGraph(WorkflowState)
 
-    # 添加新节点
+    # Add new node
     workflow.add_node("new_processing_step", self._new_processing_step)
 
-    # 添加边连接
+    # Update workflow edges
     workflow.add_edge("research_technology", "new_processing_step")
     workflow.add_edge("new_processing_step", "generate_learning_plan")
 
     return workflow.compile()
 ```
 
-## 🔧 配置选项详解
+## 🛠️ Project Strengths and Learning Outcomes
 
-### LLM配置 (config/settings.py)
-- **OpenAI API**: 默认使用gpt-4o-mini模型
-- **Anthropic API**: 可选的Claude模型支持
-- **模型参数**: temperature=0.1, max_tokens=4000
+This repository demonstrates and teaches:
 
-### 搜索配置
-- **Google搜索**: 通过SERPER_API_KEY实现，返回最新网络内容
-- **Arxiv搜索**: 自动检索相关学术论文，免费使用
-- **RSS订阅**: 内置技术博客源，可扩展添加更多源
+### Technical Concepts
+- **LangGraph workflow patterns** and state machine design
+- **Multi-agent system architecture** and collaboration patterns
+- **Async programming** in AI/ML applications for performance
+- **LLM integration** best practices with multiple providers
+- **Configuration management** for production AI applications
 
-### 应用参数
-- **DEBUG**: 调试模式开关 (False)
-- **MAX_RETRIES**: API失败重试次数 (3)
-- **TIMEOUT**: 网络请求超时时间 (30秒)
-- **MAX_SEARCH_RESULTS**: 搜索结果数量限制 (10)
-- **DEFAULT_COURSE_DURATION**: 默认课程时长 (20小时)
+### Practical Skills
+- **Error handling** and resilience patterns with graceful fallbacks
+- **Extensibility** through modular design principles
+- **Production readiness** with comprehensive configuration and logging
+- **Performance optimization** through async processing and concurrent operations
 
-## 📈 输出格式规范
+### Use Cases Demonstrated
+1. **Automated Learning Plan Generation**: Personalized educational content creation
+2. **Multi-source Research**: Comprehensive data collection from diverse sources
+3. **Workflow Orchestration**: Complex multi-step AI processes with LangGraph
+4. **Agent Collaboration**: Multiple specialized AI agents working together
+5. **Configuration Flexibility**: Support for multiple LLM providers and search APIs
 
-### 标准返回结构
-```json
-{
-  "status": "completed|error",
-  "data": {
-    "technology": "Python",
-    "experience_level": "beginner",
-    "duration_hours": 30,
-    "research_summary": {
-      "summary": "技术分析摘要",
-      "key_insights": ["关键洞察1", "关键洞察2"]
-    },
-    "research_report": "详细研究报告",
-    "learning_plan": "完整学习方案",
-    "resources": {
-      "official_docs": ["官方文档1", "官方文档2"],
-      "tutorials": ["教程1", "教程2"],
-      "books": ["书籍1", "书籍2"]
-    },
-    "timeline": {
-      "total_hours": 30,
-      "beginner_phase": {"hours": 12, "weeks": 2},
-      "intermediate_phase": {"hours": 9, "weeks": 1},
-      "advanced_phase": {"hours": 6, "weeks": 1},
-      "expert_phase": {"hours": 3, "weeks": 0.5}
-    },
-    "success_metrics": ["成功指标1", "成功指标2"],
-    "timestamp": "2024-xx-xx",
-    "personalization_applied": true
-  },
-  "error": "错误信息 (仅在status=error时)"
-}
-```
-
-### 学习偏好配置格式
-```json
-{
-  "learning_style": "visual|hands-on|theoretical",
-  "preferred_time": "morning|evening|flexible",
-  "focus": ["specific_topics"],
-  "tools": ["preferred_tools"],
-  "project_type": "personal|professional|research",
-  "background": "user_background"
-}
-```
-
-## 🚨 错误处理
-
-### 常见问题诊断
-1. **API密钥错误**: 检查.env文件中的OPENAI_API_KEY配置
-2. **搜索结果为空**:
-   - 检查网络连接
-   - 验证SERPER_API_KEY是否配置
-   - 尝试使用更通用的技术名称
-3. **学习方案生成失败**:
-   - 确认OPENAI_API_KEY已正确设置
-   - 检查API余额是否充足
-   - 尝试减少请求的token数量
-4. **程序运行缓慢**:
-   - 调整MAX_RETRIES和TIMEOUT参数
-   - 减少MAX_SEARCH_RESULTS数量
-
-### 调试模式
-```bash
-# 启用调试模式
-export DEBUG=True
-python main.py "Python" --level beginner
-```
-
-### 配置验证
-```bash
-# 验证所有必需配置
-python -c "from config.settings import settings; exit(0 if settings.validate_config() else 1)"
-```
-
-## 🔄 Git配置
-根据上级目录的CLAUDE.md规则：
-- **不自动提交** - Claude不会自动提交任何代码更改
-- 手动提交前需要明确确认
-
-## 📝 项目特性
-
-### 核心功能
-- **智能资料收集**: 自动搜索技术文档、教程、博客和学术论文
-- **内容分析总结**: 提取关键概念、分析趋势、评估难度
-- **个性化学习方案**: 根据用户经验水平和偏好生成定制化学习路径
-- **多阶段学习规划**: 从入门到专家的完整学习路线
-- **资源推荐**: 提供官方文档、教程、工具和社区资源
-- **工作流自动化**: 基于LangGraph的智能化处理流程
-
-### 技术特点
-- **LangGraph工作流**: 状态机模式管理复杂流程
-- **异步处理**: 全面使用asyncio提升性能
-- **模块化设计**: 独立的智能体和工具组件
-- **多API支持**: OpenAI、Anthropic等多种LLM后端
-- **错误恢复**: 完善的错误处理和重试机制
+The repository serves as an excellent reference for building production-ready AI applications with LangChain and LangGraph, demonstrating both theoretical concepts and practical implementation patterns for intelligent workflow automation.
