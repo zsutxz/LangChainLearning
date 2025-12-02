@@ -1,0 +1,3 @@
+[submodule "deepagents"]
+	path = deepagents
+	url = https://github.com/langchain-ai/deepagents.git
