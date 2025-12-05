@@ -9,6 +9,7 @@ This is a **LangChain and LangGraph learning repository** focused on building in
 1. **Main Project**: An intelligent technical learning assistant built with LangGraph (in `test/` directory)
 2. **Claude Skills**: Multiple specialized skills for extending Claude's capabilities (in `.claude/skills/`)
 3. **Learning Resources**: Research documents and case studies for AI/ML development (in `langchain/`, `langgraph/` directories)
+4. **MCP Integration**: Model Context Protocol servers for enhanced tool integration (in `.claude/settings.json`)
 
 ## 🏗️ Repository Structure
 
@@ -41,6 +42,17 @@ Multiple specialized skills for extending Claude's capabilities:
 - `template-skill/` - Development template for new skills
 - `translate-it-article/` - Professional IT article translation
 - `code-architecture-analyzer/` - Multi-language project architecture analysis
+- `algorithmic-art/` - Generative art creation using p5.js
+- `langchain-architecture/` - LangChain application design patterns
+- `llm-evaluation/` - LLM application evaluation strategies
+- `prompt-engineering-patterns/` - Advanced prompt engineering techniques
+
+### MCP Integration (`.claude/settings.json`)
+Model Context Protocol servers for enhanced capabilities:
+- **context7**: Advanced context management and retrieval
+- **filesystem**: File system operations and monitoring
+- **playwright**: Web automation and testing capabilities
+- **sequential-thinking**: Enhanced reasoning and step-by-step analysis
 
 ## ⚙️ Development Environment Setup
 
@@ -73,6 +85,8 @@ OPENAI_API_KEY=your_openai_api_key_here
 # Optional for enhanced functionality
 SERPER_API_KEY=your_serper_api_key_here          # For Google web search
 ANTHROPIC_API_KEY=your_anthropic_api_key_here    # Alternative LLM support
+USE_DEEPSEEK=true                                # Enable DeepSeek API
+DEEPSEEK_API_KEY=your_deepseek_api_key_here      # DeepSeek API key
 ```
 
 ### Key Dependencies
@@ -83,6 +97,10 @@ ANTHROPIC_API_KEY=your_anthropic_api_key_here    # Alternative LLM support
 - **asyncio, aiohttp** - Async processing for performance
 - **requests, beautifulsoup4** - Web scraping capabilities
 - **python-dotenv** - Environment variable management
+- **arxiv>=2.0.0** - Academic paper search
+- **feedparser>=6.0.0** - RSS feed processing
+- **lxml>=4.9.0** - XML/HTML parsing
+- **pandas>=2.0.0** - Data manipulation and analysis
 
 ## 🚀 Common Development Commands
 
@@ -124,9 +142,15 @@ python -c "from config.settings import settings; print('Configuration valid:', s
 # Verify required API keys are set
 python -c "from config.settings import settings; exit(0 if settings.validate_config() else 1)"
 
+# Test DeepSeek API configuration
+python testdeepseek.py
+
 # Enable debug mode for troubleshooting
 export DEBUG=True
 python main.py "Python" --level beginner
+
+# Test search functionality
+python testresearch.py
 ```
 
 ## 🏛️ Core Architecture Patterns
@@ -258,6 +282,71 @@ def _create_workflow(self) -> StateGraph:
     return workflow.compile()
 ```
 
+## 🎨 Claude Skills Integration
+
+### Available Skills
+The repository includes 7 specialized Claude skills:
+
+1. **Code Architecture Analyzer** (`code-architecture-analyzer/`)
+   - Multi-language project architecture analysis
+   - Design pattern recognition and dependency mapping
+   - Use with: `Analyze this project's architecture and identify design patterns`
+
+2. **AI News Aggregator** (`ai-news-aggregator/`)
+   - AI industry news collection and summarization
+   - Use with: `Get the latest AI news and trends`
+
+3. **GitHub AI Projects** (`github-ai-projects/`)
+   - Discovery and analysis of AI projects on GitHub
+   - Use with: `Find interesting AI projects on GitHub`
+
+4. **Lead Research Assistant** (`lead-research-assistant/`)
+   - Business development research automation
+   - Use with: `Research potential leads for our product`
+
+5. **Skill Creator** (`skill-creator/`)
+   - Meta-skill for creating new Claude skills
+   - Use with: `Help me create a new skill for X`
+
+6. **Translate IT Article** (`translate-it-article/`)
+   - Professional IT article translation
+   - Use with: `Translate this technical article to Chinese`
+
+7. **Template Skill** (`template-skill/`)
+   - Development template for new skills
+   - Use with: `Create a new skill based on the template`
+
+8. **Algorithmic Art** (`algorithmic-art/`)
+   - Generative art creation using p5.js
+   - Use with: `Create algorithmic art with p5.js`
+
+9. **LangChain Architecture** (`langchain-architecture/`)
+   - LangChain application design patterns
+   - Use with: `Design a LangChain application for X`
+
+10. **LLM Evaluation** (`llm-evaluation/`)
+    - LLM application evaluation strategies
+    - Use with: `Evaluate this LLM application's performance`
+
+11. **Prompt Engineering Patterns** (`prompt-engineering-patterns/`)
+    - Advanced prompt engineering techniques
+    - Use with: `Optimize prompts for better LLM performance`
+
+### Skill Usage Pattern
+```bash
+# Skills are automatically available through Claude Code
+# Use natural language to trigger specific skills
+skill: "code-architecture-analyzer"  # Explicit skill invocation
+# or let Claude automatically select based on context
+```
+
+### MCP Integration
+The project integrates Model Context Protocol (MCP) servers:
+- **filesystem**: File system operations and monitoring
+- **context7**: Context management and retrieval
+- **playwright**: Web automation and testing
+- **sequential-thinking**: Enhanced reasoning capabilities
+
 ## 🛠️ Project Strengths and Learning Outcomes
 
 This repository demonstrates and teaches:
@@ -268,12 +357,14 @@ This repository demonstrates and teaches:
 - **Async programming** in AI/ML applications for performance
 - **LLM integration** best practices with multiple providers
 - **Configuration management** for production AI applications
+- **Claude Skills development** and MCP integration
 
 ### Practical Skills
 - **Error handling** and resilience patterns with graceful fallbacks
 - **Extensibility** through modular design principles
 - **Production readiness** with comprehensive configuration and logging
 - **Performance optimization** through async processing and concurrent operations
+- **Skill development** for Claude Code extensibility
 
 ### Use Cases Demonstrated
 1. **Automated Learning Plan Generation**: Personalized educational content creation
@@ -281,5 +372,7 @@ This repository demonstrates and teaches:
 3. **Workflow Orchestration**: Complex multi-step AI processes with LangGraph
 4. **Agent Collaboration**: Multiple specialized AI agents working together
 5. **Configuration Flexibility**: Support for multiple LLM providers and search APIs
+6. **Skill-Based Architecture**: Extensible system through Claude Skills
+7. **MCP Integration**: Advanced tool integration through Model Context Protocol
 
-The repository serves as an excellent reference for building production-ready AI applications with LangChain and LangGraph, demonstrating both theoretical concepts and practical implementation patterns for intelligent workflow automation.
+The repository serves as an excellent reference for building production-ready AI applications with LangChain and LangGraph, demonstrating both theoretical concepts and practical implementation patterns for intelligent workflow automation and Claude Code skill development.
