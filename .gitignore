@@ -98,3 +98,4 @@ sensitive/
 *.tmp
 *.temp
 *.bak
+.claude/settings.local.json
