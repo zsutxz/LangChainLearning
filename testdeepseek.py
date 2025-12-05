@@ -90,7 +90,7 @@ async def test_learning():
 async def main():
     """主函数"""
     success = await test_deepseek_config()
-    success = await test_learning()
+    # success = await test_learning()
 
     print(f"\n=== 测试结果 ===")
     if success:

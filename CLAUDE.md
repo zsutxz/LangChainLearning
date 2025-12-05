@@ -6,18 +6,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a **LangChain and LangGraph learning repository** focused on building intelligent agents and workflows. The repository contains:
 
-1. **Main Project**: An intelligent technical learning assistant built with LangGraph (in `test/` directory)
+1. **Main Project**: An intelligent technical learning assistant built with LangGraph (in `Sample/` directory)
 2. **Claude Skills**: Multiple specialized skills for extending Claude's capabilities (in `.claude/skills/`)
 3. **Learning Resources**: Research documents and case studies for AI/ML development (in `langchain/`, `langgraph/` directories)
 4. **MCP Integration**: Model Context Protocol servers for enhanced tool integration (in `.claude/settings.json`)
 
 ## 🏗️ Repository Structure
 
-### Core Technical Learning Assistant (`test/`)
+### Core Technical Learning Assistant (`Sample/`)
 The main project demonstrates LangGraph workflow capabilities:
 
 ```
-test/                          # Main LangGraph project directory
+Sample/                       # Main LangGraph project directory
 ├── main.py                    # Entry point - TechLearningAssistant class with CLI interface
 ├── config/settings.py         # Configuration management - API keys, model settings, DeepSeek support
 ├── src/tech_learning_workflow.py  # LangGraph workflow engine - state management and process orchestration
@@ -28,9 +28,9 @@ test/                          # Main LangGraph project directory
 │   ├── web_searcher.py        # Web search - Google search, Arxiv papers, RSS feeds
 │   └── content_analyzer.py    # Content analysis - key concept extraction, trend analysis
 ├── examples/basic_usage.py    # Usage examples - basic, advanced, batch, personalized scenarios
-├── testresearch.py            # Search functionality testing
-├── testdeepseek.py            # DeepSeek API configuration testing
-└── requirements.txt           # Python dependencies
+├── requirements.txt           # Python dependencies
+├── .env.example               # Environment variables template
+└── CLAUDE.md                  # Project-specific Claude Code guide
 ```
 
 ### Claude Skills (`.claude/skills/`)
@@ -63,7 +63,7 @@ Model Context Protocol servers for enhanced capabilities:
 ### Installation Commands
 ```bash
 # Navigate to the main project directory
-cd test/
+cd Sample/
 
 # Create virtual environment
 python -m venv venv
@@ -107,7 +107,7 @@ DEEPSEEK_API_KEY=your_deepseek_api_key_here      # DeepSeek API key
 ### Running the Technical Learning Assistant
 ```bash
 # Navigate to project directory first
-cd test/
+cd Sample/
 
 # Basic usage - generate learning plan
 python main.py "Python" --level beginner --hours 30
@@ -127,10 +127,10 @@ python main.py "React" --level intermediate --output react_plan.json
 # Run comprehensive usage examples
 python examples/basic_usage.py
 
-# Test search functionality
+# Test search functionality (from project root)
 python testresearch.py
 
-# Test specific LLM configurations
+# Test specific LLM configurations (from project root)
 python testdeepseek.py
 
 # Validate configuration
@@ -180,7 +180,7 @@ async def research_technology(self, technology: str):
 
 ## 📊 Key Components and Usage
 
-### 1. TechLearningAssistant (main.py:13)
+### 1. TechLearningAssistant (Sample/main.py:13)
 Primary user interface class providing complete learning plan generation.
 
 ```python
@@ -207,7 +207,7 @@ async def create_learning_plan():
 result = asyncio.run(create_learning_plan())
 ```
 
-### 2. TechLearningWorkflow (src/tech_learning_workflow.py:41)
+### 2. TechLearningWorkflow (Sample/src/tech_learning_workflow.py:41)
 LangGraph workflow engine managing the entire learning plan generation process.
 
 ```python
@@ -222,7 +222,7 @@ result = await workflow.run(
 )
 ```
 
-### 3. ResearchAgent (agents/research_agent.py:14)
+### 3. ResearchAgent (Sample/agents/research_agent.py:14)
 Research agent responsible for comprehensive technology data collection and analysis.
 
 ```python
@@ -232,7 +232,7 @@ agent = ResearchAgent()
 research_results = await agent.search_technology_info("Docker")
 ```
 
-### 4. WebSearcher (tools/web_searcher.py:16)
+### 4. WebSearcher (Sample/tools/web_searcher.py:16)
 Multi-source web search tool supporting Google Search, Arxiv papers, and RSS feeds.
 
 ```python
@@ -285,7 +285,7 @@ def _create_workflow(self) -> StateGraph:
 ## 🎨 Claude Skills Integration
 
 ### Available Skills
-The repository includes 7 specialized Claude skills:
+The repository includes 11 specialized Claude skills:
 
 1. **Code Architecture Analyzer** (`code-architecture-analyzer/`)
    - Multi-language project architecture analysis
@@ -341,11 +341,15 @@ skill: "code-architecture-analyzer"  # Explicit skill invocation
 ```
 
 ### MCP Integration
-The project integrates Model Context Protocol (MCP) servers:
-- **filesystem**: File system operations and monitoring
-- **context7**: Context management and retrieval
-- **playwright**: Web automation and testing
-- **sequential-thinking**: Enhanced reasoning capabilities
+The project integrates Model Context Protocol (MCP) servers through `.claude/settings.json`:
+- **filesystem**: File system operations and monitoring (configured for D:\work\AI\ClaudeTest)
+- **context7**: Context management and retrieval via Upstash
+- **playwright**: Web automation and testing capabilities
+- **sequential-thinking**: Enhanced reasoning and step-by-step analysis
+
+### Hook System
+The project includes PreToolUse and PostToolUse hooks for filesystem operations:
+- Automatic logging of file write operations to `.claude/post-hook-test.log` and `.claude/pre-hook-test.log`
 
 ## 🛠️ Project Strengths and Learning Outcomes
 
@@ -376,3 +380,15 @@ This repository demonstrates and teaches:
 7. **MCP Integration**: Advanced tool integration through Model Context Protocol
 
 The repository serves as an excellent reference for building production-ready AI applications with LangChain and LangGraph, demonstrating both theoretical concepts and practical implementation patterns for intelligent workflow automation and Claude Code skill development.
+
+## 📍 Important Notes
+
+### Project Directory Change
+The main project has been moved from `test/` to `Sample/` directory. All references to `test/` in this documentation have been updated to reflect the new structure.
+
+### Standalone Test Scripts
+The repository includes standalone test scripts in the project root:
+- `testresearch.py` - Tests search functionality independently
+- `testdeepseek.py` - Tests DeepSeek API configuration
+
+These can be run from the repository root and don't require navigating to the `Sample/` directory.
