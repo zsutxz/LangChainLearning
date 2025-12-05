@@ -77,16 +77,39 @@ cp .env.example .env
 # Edit .env with your API keys
 ```
 
-### Required Environment Variables (.env)
+### Complete Environment Variables Reference
 ```bash
-# Required
-OPENAI_API_KEY=your_openai_api_key_here
+# === Core LLM Configuration ===
+OPENAI_API_KEY=sk-...                    # Required: OpenAI API key
+ANTHROPIC_API_KEY=sk-ant-...             # Optional: Anthropic Claude API key
+USE_DEEPSEEK=true                        # Optional: Enable DeepSeek API
+DEEPSEEK_API_KEY=sk-...                  # Required if USE_DEEPSEEK=true
 
-# Optional for enhanced functionality
-SERPER_API_KEY=your_serper_api_key_here          # For Google web search
-ANTHROPIC_API_KEY=your_anthropic_api_key_here    # Alternative LLM support
-USE_DEEPSEEK=true                                # Enable DeepSeek API
-DEEPSEEK_API_KEY=your_deepseek_api_key_here      # DeepSeek API key
+# === Search APIs (Optional) ===
+SERPER_API_KEY=your_serper_key           # Google search via Serper
+
+# === Application Configuration ===
+DEBUG=False                              # Enable debug logging
+MAX_RETRIES=3                            # API request retry attempts
+TIMEOUT=30                               # Request timeout in seconds
+
+# === Model Configuration ===
+DEFAULT_MODEL=gpt-4o-mini                # Default OpenAI model
+TEMPERATURE=0.1                          # LLM response randomness (0-1)
+MAX_TOKENS=4000                          # Maximum response tokens
+
+# === DeepSeek Configuration ===
+DEEPSEEK_MODEL=deepseek-chat             # DeepSeek model name
+DEEPSEEK_BASE_URL=https://api.deepseek.com/v1  # DeepSeek API endpoint
+
+# === Search Configuration ===
+MAX_SEARCH_RESULTS=10                    # Maximum search results per source
+SEARCH_LANGUAGES=["zh", "en"]            # Search result languages
+
+# === Learning Plan Configuration ===
+MIN_COURSE_DURATION=1                    # Minimum course duration (hours)
+MAX_COURSE_DURATION=100                  # Maximum course duration (hours)
+DEFAULT_COURSE_DURATION=20               # Default course duration (hours)
 ```
 
 ### Key Dependencies
@@ -102,7 +125,28 @@ DEEPSEEK_API_KEY=your_deepseek_api_key_here      # DeepSeek API key
 - **lxml>=4.9.0** - XML/HTML parsing
 - **pandas>=2.0.0** - Data manipulation and analysis
 
-## 🚀 Common Development Commands
+## 🚀 Development Workflow
+
+### Quick Development Setup
+```bash
+# 1. Navigate to project directory
+cd Sample/
+
+# 2. Create and activate virtual environment
+python -m venv venv
+# Windows: venv\Scripts\activate
+# macOS/Linux: source venv/bin/activate
+
+# 3. Install dependencies
+pip install -r requirements.txt
+
+# 4. Set up environment
+cp .env.example .env
+# Edit .env with your API keys
+
+# 5. Validate configuration
+python -c "from config.settings import settings; exit(0 if settings.validate_config() else 1)"
+```
 
 ### Running the Technical Learning Assistant
 ```bash
@@ -122,19 +166,62 @@ python main.py --interactive
 python main.py "React" --level intermediate --output react_plan.json
 ```
 
-### Testing and Development
+### 🧪 Testing Strategy
+
+#### Component Testing
+```bash
+# Test configuration validation
+cd Sample/
+python -c "from config.settings import settings; print('Valid:', settings.validate_config())"
+
+# Test workflow components
+python -c "
+import asyncio
+from src.tech_learning_workflow import TechLearningWorkflow
+
+async def test_workflow():
+    workflow = TechLearningWorkflow()
+    result = await workflow.run('Python', 'beginner', 20)
+    print('Test result:', result['status'])
+
+asyncio.run(test_workflow())
+"
+
+# Test agent functionality
+python -c "
+import asyncio
+from agents.research_agent import ResearchAgent
+
+async def test_research():
+    agent = ResearchAgent()
+    result = await agent.research_technology('Python', fast_mode=True)
+    print('Research test:', result['status'])
+
+asyncio.run(test_research())
+"
+```
+
+#### Integration Testing
 ```bash
 # Run comprehensive usage examples
+cd Sample/
 python examples/basic_usage.py
 
-# Test search functionality (from project root)
+# Test different LLM configurations
+export USE_DEEPSEEK=true
+python main.py "Python" --level beginner
+
+# Run standalone test scripts
 python testresearch.py
-
-# Test specific LLM configurations (from project root)
 python testdeepseek.py
+```
 
-# Validate configuration
-python -c "from config.settings import settings; print('Configuration valid:', settings.validate_config())"
+#### Debug Mode Testing
+```bash
+# Enable comprehensive logging
+export DEBUG=True
+cd Sample/
+python main.py "React" --level intermediate --hours 30
 ```
 
 ### Configuration Management
@@ -155,6 +242,21 @@ python testresearch.py
 
 ## 🏛️ Core Architecture Patterns
 
+### Detailed LangGraph State Management
+The `WorkflowState` TypedDict defines the complete data contract:
+```python
+class WorkflowState(TypedDict):
+    messages: Annotated[list, add_messages]
+    technology: str
+    experience_level: str
+    duration_hours: int
+    preferences: Dict[str, Any]
+    research_results: Optional[Dict[str, Any]]
+    learning_plan: Optional[Dict[str, Any]]
+    error: Optional[str]
+    status: str
+```
+
 ### LangGraph Workflow Design
 The project uses a **state machine pattern** with these sequential nodes:
 1. **validate_input** - Parameter validation and normalization
@@ -163,6 +265,22 @@ The project uses a **state machine pattern** with these sequential nodes:
 4. **customize_plan** - Personalization based on user preferences (optional)
 5. **generate_final_output** - Result integration and formatting
 6. **handle_error** - Comprehensive error handling and recovery
+
+### Conditional Routing Logic
+The workflow uses conditional routing for personalization:
+```python
+workflow.add_conditional_edges(
+    "generate_learning_plan",
+    self._should_customize,  # Routes based on preferences existence
+    {
+        "customize": "customize_plan",
+        "finalize": "generate_final_output"
+    }
+)
+```
+
+### Fast Mode Implementation
+The research agent supports a `fast_mode=True` parameter that skips network searches and provides mock data for development/testing.
 
 ### Agent Collaboration Pattern
 - **ResearchAgent**: Coordinates WebSearcher and ContentAnalyzer for comprehensive data collection
@@ -387,8 +505,112 @@ The repository serves as an excellent reference for building production-ready AI
 The main project has been moved from `test/` to `Sample/` directory. All references to `test/` in this documentation have been updated to reflect the new structure.
 
 ### Standalone Test Scripts
-The repository includes standalone test scripts in the project root:
+The repository includes test scripts in the `Sample/` directory:
 - `testresearch.py` - Tests search functionality independently
 - `testdeepseek.py` - Tests DeepSeek API configuration
 
-These can be run from the repository root and don't require navigating to the `Sample/` directory.
+Run these from the `Sample/` directory to test individual components.
+
+## 🚨 Troubleshooting Guide
+
+### Common Issues and Solutions
+
+#### 1. Configuration Validation Fails
+**Problem**: `settings.validate_config()` returns False
+```bash
+# Check API key configuration
+cd Sample/
+python -c "from config.settings import settings; print('OpenAI Key:', bool(settings.OPENAI_API_KEY)); print('DeepSeek Key:', bool(settings.DEEPSEEK_API_KEY)); print('Use DeepSeek:', settings.USE_DEEPSEEK)"
+
+# Fix: Ensure at least one LLM provider is properly configured
+# Edit .env file with valid API keys
+```
+
+#### 2. Search Returns No Results
+**Problem**: "未找到关于 X 的相关资料"
+```bash
+# Test search functionality
+cd Sample/
+python -c "
+import asyncio
+from tools.web_searcher import WebSearcher
+
+async def test_search():
+    searcher = WebSearcher()
+    async with searcher:
+        results = await searcher.comprehensive_search('Python tutorial')
+        print('Search results:', len(results))
+
+asyncio.run(test_search())
+"
+
+# Fix: Check SERPER_API_KEY configuration or use fast_mode
+```
+
+#### 3. LLM API Errors
+**Problem**: API rate limits or authentication failures
+```bash
+# Test LLM configuration
+cd Sample/
+python -c "
+from langchain_openai import ChatOpenAI
+from config.settings import settings
+
+try:
+    llm = ChatOpenAI(**settings.get_llm_config())
+    response = llm.invoke('Hello')
+    print('LLM test successful')
+except Exception as e:
+    print('LLM test failed:', e)
+"
+
+# Fix: Verify API keys, check rate limits, try alternative LLM
+```
+
+#### 4. Workflow State Errors
+**Problem**: Workflow fails at specific nodes
+```bash
+# Enable debug mode for detailed logging
+export DEBUG=True
+cd Sample/
+python main.py "Python" --level beginner
+```
+
+#### 5. Memory Issues in Batch Processing
+**Problem**: High memory usage during batch operations
+```bash
+# Process in smaller batches or use fast_mode for development
+python -c "
+import asyncio
+from main import TechLearningAssistant
+
+async def memory_efficient_batch():
+    assistant = TechLearningAssistant()
+    technologies = ['Python', 'JavaScript', 'TypeScript']
+
+    # Process one at a time to limit memory usage
+    for tech in technologies:
+        try:
+            result = await assistant.create_learning_plan(tech, 'beginner', 20)
+            if result['status'] == 'completed':
+                assistant.save_result(result, f'memory_{tech.lower()}.json')
+            print(f'Completed: {tech}')
+        except Exception as e:
+            print(f'Error with {tech}: {e}')
+
+asyncio.run(memory_efficient_batch())
+"
+```
+
+### Debug Mode Features
+When `DEBUG=True`, the system provides:
+- Detailed API request/response logging
+- Workflow state transition tracking
+- Performance timing information
+- Error stack traces with context
+
+### Getting Help
+1. Check error messages in debug mode
+2. Verify configuration with `settings.validate_config()`
+3. Test individual components before running full workflow
+4. Use fast_mode for development to isolate network issues

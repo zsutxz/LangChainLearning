@@ -1,15 +1,24 @@
 # 基于LangGraph的智能技术学习助手
 
-一个使用LangGraph构建的智能体，能够自动收集指定IT技术的最新资料，进行分析总结，并生成个性化学习方案。
+一个使用LangGraph构建的智能体，能够自动收集指定IT技术的最新资料，进行分析总结，并生成个性化学习方案。支持多种LLM提供商，具备完整的错误处理和开发调试功能。
 
 ## 🌟 功能特性
 
+### 核心功能
 - **智能资料收集**: 自动搜索最新的技术文档、教程、博客和学术论文
 - **内容分析总结**: 提取关键概念、分析趋势、评估难度
 - **个性化学习方案**: 根据用户经验水平和偏好生成定制化学习路径
 - **多阶段学习规划**: 从入门到专家的完整学习路线
 - **资源推荐**: 提供官方文档、教程、工具和社区资源
 - **工作流自动化**: 基于LangGraph的智能化处理流程
+
+### 高级特性
+- **多LLM支持**: OpenAI GPT、DeepSeek API，支持自动切换
+- **交互式界面**: 引导式输入，降低使用门槛
+- **异步处理**: 高性能并发搜索和分析
+- **错误恢复**: 完善的错误处理和降级机制
+- **开发友好**: 完整的调试模式和测试工具
+- **快速模式**: 开发时使用模拟数据，提升效率
 
 ## 🚀 快速开始
 
@@ -35,21 +44,29 @@ pip install -r requirements.txt
 cp .env.example .env
 
 # 编辑 .env 文件，添加你的API密钥
-OPENAI_API_KEY=your_openai_api_key_here
-SERPER_API_KEY=your_serper_api_key_here  # 可选，用于Google搜索
+OPENAI_API_KEY=your_openai_api_key_here                    # 必需
+SERPER_API_KEY=your_serper_api_key_here                   # 可选，用于Google搜索
+USE_DEEPSEEK=true                                         # 可选，启用DeepSeek API
+DEEPSEEK_API_KEY=your_deepseek_api_key_here               # 使用DeepSeek时必需
 ```
 
 ### 3. 运行示例
 
 ```bash
+# 验证配置
+python -c "from config.settings import settings; print('Configuration valid:', settings.validate_config())"
+
 # 基础使用示例
 python examples/basic_usage.py
 
 # 命令行模式
 python main.py "Python" --level beginner --hours 30
 
-# 交互模式
+# 交互模式 - 提供引导式输入
 python main.py --interactive
+
+# 保存结果到文件
+python main.py "React" --level intermediate --output react_plan.json
 ```
 
 ## 📖 使用方法
@@ -104,23 +121,25 @@ result = asyncio.run(create_plan())
 ## 🏗️ 项目架构
 
 ```
-langgraph-agent/
-├── config/                    # 配置文件
-│   └── settings.py           # 应用配置
-├── tools/                     # 工具模块
-│   ├── web_searcher.py       # 网络搜索工具
-│   └── content_analyzer.py   # 内容分析工具
-├── agents/                    # 智能体模块
-│   ├── research_agent.py     # 研究智能体
-│   └── learning_agent.py     # 学习方案生成智能体
-├── src/                       # 核心模块
-│   └── tech_learning_workflow.py  # 工作流定义
-├── examples/                  # 使用示例
-│   └── basic_usage.py        # 基础使用示例
-├── main.py                    # 主程序入口
-├── requirements.txt           # 依赖列表
-├── .env.example              # 环境变量模板
-└── README.md                 # 项目文档
+sample/                          # 项目根目录
+├── config/                     # 配置文件
+│   └── settings.py            # 应用配置和多LLM支持
+├── tools/                      # 工具模块
+│   ├── web_searcher.py        # 网络搜索工具 (Google/ArXiv/RSS)
+│   └── content_analyzer.py    # 内容分析工具
+├── agents/                     # 智能体模块
+│   ├── research_agent.py      # 研究智能体
+│   └── learning_agent.py      # 学习方案生成智能体
+├── src/                        # 核心模块
+│   └── tech_learning_workflow.py  # LangGraph工作流定义
+├── examples/                   # 使用示例
+│   └── basic_usage.py         # 基础使用示例
+├── main.py                     # 主程序入口 (CLI + 编程接口)
+├── testdeepseek.py            # DeepSeek API测试脚本
+├── requirements.txt            # 依赖列表
+├── .env.example               # 环境变量模板
+├── CLAUDE.md                  # Claude Code 开发指南
+└── README.md                  # 项目文档
 ```
 
 ## 🔧 核心组件
@@ -148,11 +167,12 @@ langgraph-agent/
 - 资源推荐匹配
 - 进度跟踪建议
 
-### 5. TechLearningWorkflow (工作流)
-- 基于LangGraph的状态管理
-- 自动化处理流程
-- 错误处理机制
-- 结果整合输出
+### 5. TechLearningWorkflow (LangGraph工作流)
+- 基于LangGraph的状态机模式
+- 6个顺序处理节点：验证→研究→生成→个性化→整合→错误处理
+- 条件路由支持动态个性化流程
+- 完整的错误处理和恢复机制
+- 异步并发处理优化性能
 
 ## 📊 输出格式
 
@@ -207,11 +227,20 @@ langgraph-agent/
 ## ⚙️ 配置选项
 
 ### 环境变量
-- `OPENAI_API_KEY`: OpenAI API密钥 (必需)
-- `SERPER_API_KEY`: Google搜索API密钥 (可选)
-- `DEBUG`: 调试模式开关
-- `MAX_RETRIES`: 最大重试次数
-- `TIMEOUT`: 请求超时时间
+- `OPENAI_API_KEY`: OpenAI API密钥 (必需，或使用DeepSeek)
+- `ANTHROPIC_API_KEY`: Anthropic Claude API密钥 (可选)
+- `DEEPSEEK_API_KEY`: DeepSeek API密钥 (使用DeepSeek时必需)
+- `USE_DEEPSEEK`: 启用DeepSeek API (true/false，默认false)
+- `SERPER_API_KEY`: Google搜索API密钥 (可选，影响搜索质量)
+- `DEBUG`: 调试模式开关 (true/false，默认false)
+- `MAX_RETRIES`: 最大重试次数 (默认3)
+- `TIMEOUT`: 请求超时时间 (默认30秒)
+
+### 多LLM支持
+项目支持多种语言模型：
+- **OpenAI GPT**: 默认选择 (gpt-4o-mini)
+- **DeepSeek**: 经济高效的中文优化模型
+- **自动切换**: 配置失败时的优雅降级
 
 ### 学习偏好配置
 ```json
@@ -238,9 +267,11 @@ A:
 
 **Q: 学习方案生成失败**
 A:
-- 确认OPENAI_API_KEY已正确设置
+- 确认API密钥已正确设置 (OpenAI或DeepSeek)
 - 检查API余额是否充足
-- 尝试减少请求的token数量
+- 尝试切换到不同的LLM提供商
+- 验证网络连接和防火墙设置
+- 使用 `DEBUG=True` 获取详细错误信息
 
 **Q: 程序运行缓慢**
 A:
@@ -248,12 +279,21 @@ A:
 - 增加超时时间设置
 - 减少搜索结果数量
 
-### 调试模式
+### 调试和测试
 
 ```bash
 # 启用调试模式
 export DEBUG=True
 python main.py "Python" --level beginner
+
+# 配置验证
+python -c "from config.settings import settings; exit(0 if settings.validate_config() else 1)"
+
+# 测试DeepSeek API配置
+python testdeepseek.py
+
+# 运行使用示例
+python examples/basic_usage.py
 ```
 
 ## 🤝 贡献指南
@@ -265,6 +305,13 @@ python main.py "Python" --level beginner
 5. 开启 Pull Request
 
 ## 📝 更新日志
+
+### v1.1.0
+- 新增DeepSeek API支持，提供经济高效的LLM选择
+- 增强配置验证和错误处理机制
+- 优化LangGraph工作流，支持条件路由
+- 添加交互模式，提供引导式用户体验
+- 完善开发文档和测试脚本
 
 ### v1.0.0
 - 初始版本发布
@@ -281,7 +328,9 @@ python main.py "Python" --level beginner
 - [LangGraph](https://github.com/langchain-ai/langgraph) - 工作流框架
 - [LangChain](https://github.com/langchain-ai/langchain) - LLM应用框架
 - [OpenAI](https://openai.com/) - 语言模型API
+- [DeepSeek](https://www.deepseek.com/) - 经济高效的LLM服务
 - [Serper](https://serper.dev/) - 搜索API服务
+- [ArXiv](https://arxiv.org/) - 学术论文搜索
 
 ## 📞 联系方式
 

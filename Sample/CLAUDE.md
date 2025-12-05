@@ -30,11 +30,14 @@ python main.py "Python" --level beginner --hours 30
 # Advanced usage with personalization
 python main.py "Machine Learning" --level advanced --hours 60 --preferences '{"learning_style": "hands-on"}'
 
-# Interactive mode
+# Interactive mode - guided prompts for all inputs
 python main.py --interactive
 
 # Save results to file
 python main.py "React" --level intermediate --output react_plan.json
+
+# CLI help - see all available options
+python main.py --help
 ```
 
 ### Testing and Development
@@ -42,14 +45,40 @@ python main.py "React" --level intermediate --output react_plan.json
 # Run comprehensive usage examples
 python examples/basic_usage.py
 
-# Test search functionality
-python ../testresearch.py
+# Test search functionality (if available)
+# python testresearch.py  # Note: This file may not exist in current directory
 
 # Test specific LLM configurations
-python ../testdeepseek.py
+python testdeepseek.py
 
 # Validate configuration
 python -c "from config.settings import settings; print('Configuration valid:', settings.validate_config())"
+
+# Test individual components in isolation
+python -c "
+import asyncio
+from src.tech_learning_workflow import TechLearningWorkflow
+
+async def test_workflow():
+    workflow = TechLearningWorkflow()
+    result = await workflow.run('Python', 'beginner', 20)
+    print('Test result:', result['status'])
+
+asyncio.run(test_workflow())
+"
+
+# Test agent functionality
+python -c "
+import asyncio
+from agents.research_agent import ResearchAgent
+
+async def test_research():
+    agent = ResearchAgent()
+    result = await agent.research_technology('Python', fast_mode=True)
+    print('Research test:', result['status'])
+
+asyncio.run(test_research())
+"
 ```
 
 ### Configuration Management
@@ -80,6 +109,37 @@ This project uses a **state machine workflow pattern** with sequential processin
 4. **customize_plan** - Personalization based on user preferences (optional)
 5. **generate_final_output** - Result integration and formatting
 6. **handle_error** - Comprehensive error handling and recovery
+
+### Detailed LangGraph State Management
+The `WorkflowState` TypedDict defines the complete data contract:
+```python
+class WorkflowState(TypedDict):
+    messages: Annotated[list, add_messages]
+    technology: str
+    experience_level: str
+    duration_hours: int
+    preferences: Dict[str, Any]
+    research_results: Optional[Dict[str, Any]]
+    learning_plan: Optional[Dict[str, Any]]
+    error: Optional[str]
+    status: str
+```
+
+### LangGraph Workflow Design
+The workflow uses conditional routing for personalization:
+```python
+workflow.add_conditional_edges(
+    "generate_learning_plan",
+    self._should_customize,  # Routes based on preferences existence
+    {
+        "customize": "customize_plan",
+        "finalize": "generate_final_output"
+    }
+)
+```
+
+### Fast Mode Implementation
+The research agent supports a `fast_mode=True` parameter that skips network searches and provides mock data for development/testing.
 
 ### Key Components
 
@@ -247,9 +307,108 @@ python main.py "Python" --level beginner
 
 ### Test Components Individually
 ```bash
-# Test research component
-python ../testresearch.py
+# Test research component (if available)
+# python testresearch.py  # Note: This file may not exist in current directory
 
 # Test LLM configuration
-python ../testdeepseek.py
+python testdeepseek.py
 ```
+
+### Advanced Debugging Techniques
+
+#### Workflow State Inspection
+```python
+# Debug workflow state transitions
+python -c "
+import asyncio
+from src.tech_learning_workflow import TechLearningWorkflow
+
+async def debug_workflow():
+    workflow = TechLearningWorkflow()
+    # Enable step-by-step execution
+    result = await workflow.run('Python', 'beginner', 20)
+    print('Full state:', result)
+
+asyncio.run(debug_workflow())
+"
+```
+
+#### Agent-Specific Testing
+```python
+# Test research agent in isolation
+python -c "
+import asyncio
+from agents.research_agent import ResearchAgent
+
+async def debug_research():
+    agent = ResearchAgent()
+    # Test with fast mode to avoid network issues
+    result = await agent.research_technology('Python', fast_mode=True)
+    print('Research result keys:', list(result.keys()))
+
+asyncio.run(debug_research())
+"
+```
+
+#### Configuration Validation
+```bash
+# Comprehensive configuration check
+python -c "
+from config.settings import settings
+print('OpenAI Key:', bool(settings.OPENAI_API_KEY))
+print('DeepSeek Key:', bool(settings.DEEPSEEK_API_KEY))
+print('Use DeepSeek:', settings.USE_DEEPSEEK)
+print('Serper Key:', bool(settings.SERPER_API_KEY))
+print('Config Valid:', settings.validate_config())
+"
+```
+
+### Performance Optimization
+```bash
+# Test with fast mode for development
+python -c "
+import asyncio
+from main import TechLearningAssistant
+
+async def fast_mode_test():
+    assistant = TechLearningAssistant()
+    # Mock data for faster development
+    result = await assistant.create_learning_plan('Python', 'beginner', 20)
+    print('Fast mode test completed')
+
+asyncio.run(fast_mode_test())
+"
+```
+
+## Development Best Practices
+
+### Fast Mode Development
+For rapid development and testing, use the built-in fast mode capabilities:
+- **ResearchAgent.fast_mode=True**: Skips network searches, returns mock data
+- **Workflow Testing**: Test workflow logic without external dependencies
+- **Component Isolation**: Test individual agents without full workflow execution
+
+### Environment Configuration
+- **Development**: Set `DEBUG=True` for detailed logging
+- **Testing**: Use `fast_mode=True` to avoid rate limits and network dependencies
+- **Production**: Ensure all API keys are properly configured and validated
+
+### Performance Considerations
+- **Async Processing**: All I/O operations are async for performance
+- **Concurrent Searches**: Multiple search sources run concurrently
+- **Error Recovery**: Graceful degradation when external services fail
+
+### Git Configuration
+Note that test files are excluded from version control:
+```bash
+# Test files are ignored by .gitignore
+test_*.py
+*_test.py
+debug_*.py
+```
+
+### Development Workflow
+1. **Setup**: Validate configuration with `settings.validate_config()`
+2. **Development**: Use fast mode and debug logging for rapid iteration
+3. **Testing**: Test components individually before integration
+4. **Validation**: Run full workflow with real APIs before deployment

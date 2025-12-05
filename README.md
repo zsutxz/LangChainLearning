@@ -12,12 +12,13 @@
 本项目是一个多功能的 AI 学习和开发平台，包含三个核心组件：
 
 ### 🤖 智能技术学习助手 (`Sample/`)
-基于 LangGraph 构建的智能学习系统，能够：
-- 自动收集和分析最新技术资料（Google 搜索、ArXiv 论文、RSS 订阅）
-- 生成个性化学习方案和进阶路径
-- 提供多阶段学习规划（初学者到专家）
-- 支持多种 LLM 提供商（OpenAI GPT、DeepSeek、Anthropic Claude）
-- 异步处理提供高性能并发操作
+基于 LangGraph 构建的智能学习系统，具备以下核心能力：
+- **多源数据收集**：Google 搜索、ArXiv 论文、RSS 订阅的并发搜索
+- **个性化学习方案**：根据用户偏好和经验水平生成定制化学习路径
+- **智能工作流引擎**：使用 LangGraph 状态机模式实现复杂的多步骤 AI 处理
+- **多 LLM 支持**：OpenAI GPT、DeepSeek、Anthropic Claude 的灵活切换
+- **高性能异步架构**：全异步处理实现高并发和资源优化
+- **企业级错误处理**：全面的异常处理和优雅降级机制
 
 ### 🛠️ Claude 技能集合 (`.claude/skills/`)
 11 个专业化 Claude 技能，扩展 Claude Code 的能力：
@@ -47,7 +48,7 @@ Model Context Protocol 服务器集成，提供增强的工具能力：
 - **OpenAI API Key** (必需)
 - **可选**: Serper API Key (用于 Google 搜索)、DeepSeek API Key、Anthropic API Key
 
-### 安装步骤
+### 快速开发设置
 
 ```bash
 # 1. 克隆仓库
@@ -57,11 +58,12 @@ cd LangChainLearning
 # 2. 进入主项目目录 (推荐使用 Sample/ 目录的最新版本)
 cd Sample/
 
-# 3. 创建虚拟环境
+# 3. 创建并激活虚拟环境
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+# Windows: venv\Scripts\activate
+# macOS/Linux: source venv/bin/activate
 
-# 4. 安装依赖
+# 4. 安装项目依赖
 pip install -r requirements.txt
 
 # 5. 配置环境变量
@@ -69,21 +71,39 @@ cp .env.example .env
 # 编辑 .env 文件，添加你的 API 密钥
 
 # 6. 验证配置
-python -c "from config.settings import settings; print('配置有效:', settings.validate_config())"
+python -c "from config.settings import settings; exit(0 if settings.validate_config() else 1)"
 ```
 
-### 环境变量配置
+### 完整环境变量配置
 
 ```bash
-# 必需
-OPENAI_API_KEY=your_openai_api_key_here
+# === 核心大语言模型配置 ===
+OPENAI_API_KEY=sk-...                    # 必需：OpenAI API 密钥
+ANTHROPIC_API_KEY=sk-ant-...             # 可选：Anthropic Claude API
+USE_DEEPSEEK=true                        # 可选：启用 DeepSeek API
+DEEPSEEK_API_KEY=sk-...                  # 启用 DeepSeek 时必需
 
-# 可选
-SERPER_API_KEY=your_serper_api_key_here          # Google 搜索
-ANTHROPIC_API_KEY=your_anthropic_api_key_here    # Claude API
-USE_DEEPSEEK=true                                # 启用 DeepSeek
-DEEPSEEK_API_KEY=your_deepseek_api_key_here      # DeepSeek API
-DEBUG=False                                      # 调试模式
+# === 搜索 API 配置 ===
+SERPER_API_KEY=your_serper_key           # 可选：Google 搜索 via Serper
+
+# === 应用配置 ===
+DEBUG=False                              # 调试模式开关
+MAX_RETRIES=3                            # API 请求重试次数
+TIMEOUT=30                               # 请求超时时间（秒）
+
+# === 模型配置 ===
+DEFAULT_MODEL=gpt-4o-mini                # 默认 OpenAI 模型
+TEMPERATURE=0.1                          # LLM 响应随机性 (0-1)
+MAX_TOKENS=4000                          # 最大响应 token 数
+
+# === 搜索配置 ===
+MAX_SEARCH_RESULTS=10                    # 每个源的最大搜索结果数
+SEARCH_LANGUAGES=["zh", "en"]            # 搜索结果语言
+
+# === 学习计划配置 ===
+MIN_COURSE_DURATION=1                    # 最短课程时长（小时）
+MAX_COURSE_DURATION=100                  # 最长课程时长（小时）
+DEFAULT_COURSE_DURATION=20               # 默认课程时长（小时）
 ```
 
 ## 🎮 使用方法
@@ -141,36 +161,86 @@ async def create_learning_plan():
 result = asyncio.run(create_learning_plan())
 ```
 
-### 测试和验证 (Sample/ 目录)
+### 🧪 测试和开发策略
+
+#### 组件测试
 ```bash
 # 验证配置
+cd Sample/
 python -c "from config.settings import settings; print('配置有效:', settings.validate_config())"
 
-# 运行使用示例
+# 测试工作流组件
+python -c "
+import asyncio
+from src.tech_learning_workflow import TechLearningWorkflow
+
+async def test_workflow():
+    workflow = TechLearningWorkflow()
+    result = await workflow.run('Python', 'beginner', 20)
+    print('测试结果:', result['status'])
+
+asyncio.run(test_workflow())
+"
+
+# 测试智能体功能
+python -c "
+import asyncio
+from agents.research_agent import ResearchAgent
+
+async def test_research():
+    agent = ResearchAgent()
+    result = await agent.research_technology('Python', fast_mode=True)
+    print('研究测试:', result['status'])
+
+asyncio.run(test_research())
+"
+```
+
+#### 集成测试
+```bash
+# 运行综合使用示例
+cd Sample/
 python examples/basic_usage.py
 
-# 测试搜索功能 (从项目根目录)
+# 测试不同 LLM 配置
+export USE_DEEPSEEK=true
+python main.py "Python" --level beginner
+
+# 运行独立测试脚本
+cd Sample/
 python testresearch.py
-
-# 测试 DeepSeek API (从项目根目录)
 python testdeepseek.py
+```
 
-# 交互式学习方案创建
+#### 调试模式测试
+```bash
+# 启用详细日志记录
+export DEBUG=True
+cd Sample/
+python main.py "React" --level intermediate --hours 30
+```
+
+#### 开发模式测试
+```bash
+# 开发环境快速测试
+cd Sample/
 python -c "
 import asyncio
 from main import TechLearningAssistant
 
-async def demo():
+async def dev_test():
     assistant = TechLearningAssistant()
     result = await assistant.create_learning_plan(
         technology='FastAPI',
         experience_level='intermediate',
-        duration_hours=25
+        duration_hours=25,
+        preferences={'learning_style': 'hands-on'}
     )
-    print(f'状态: {result[\"status\"]}')
-    return result
+    print('状态:', result['status'])
+    if result['status'] == 'completed':
+        assistant.save_result(result, 'dev_test.json')
 
-asyncio.run(demo())
+asyncio.run(dev_test())
 "
 ```
 
@@ -250,8 +320,8 @@ LangChainLearning/
 │   └── settings.json               # MCP 服务器配置
 ├── langchain/                      # LangChain 学习资源
 ├── langgraph/                      # LangGraph 学习资源
-├── testresearch.py                 # 搜索功能测试脚本
-├── testdeepseek.py                 # DeepSeek API配置测试
+├── testresearch.py                 # 搜索功能测试脚本 (在Sample/目录)
+├── testdeepseek.py                 # DeepSeek API配置测试 (在Sample/目录)
 ├── CLAUDE.md                       # 仓库级 Claude Code 指南
 └── README.md                       # 项目文档
 ```
@@ -375,6 +445,111 @@ LangChainLearning/
 - 教学资源整理
 - 学习路径规划
 
+## 🚨 故障排除指南
+
+### 常见问题和解决方案
+
+#### 1. 配置验证失败
+**问题**: `settings.validate_config()` 返回 False
+```bash
+# 检查 API 密钥配置
+cd Sample/
+python -c "from config.settings import settings; print('OpenAI Key:', bool(settings.OPENAI_API_KEY)); print('DeepSeek Key:', bool(settings.DEEPSEEK_API_KEY)); print('Use DeepSeek:', settings.USE_DEEPSEEK)"
+
+# 解决方案：确保至少配置一个有效的 LLM 提供商
+# 编辑 .env 文件，添加有效的 API 密钥
+```
+
+#### 2. 搜索返回无结果
+**问题**: "未找到关于 X 的相关资料"
+```bash
+# 测试搜索功能
+cd Sample/
+python -c "
+import asyncio
+from tools.web_searcher import WebSearcher
+
+async def test_search():
+    searcher = WebSearcher()
+    async with searcher:
+        results = await searcher.comprehensive_search('Python tutorial')
+        print('搜索结果数量:', len(results))
+
+asyncio.run(test_search())
+"
+
+# 解决方案：检查 SERPER_API_KEY 配置或使用 fast_mode
+```
+
+#### 3. LLM API 错误
+**问题**: API 速率限制或认证失败
+```bash
+# 测试 LLM 配置
+cd Sample/
+python -c "
+from langchain_openai import ChatOpenAI
+from config.settings import settings
+
+try:
+    llm = ChatOpenAI(**settings.get_llm_config())
+    response = llm.invoke('Hello')
+    print('LLM 测试成功')
+except Exception as e:
+    print('LLM 测试失败:', e)
+"
+
+# 解决方案：验证 API 密钥，检查速率限制，尝试备用 LLM
+```
+
+#### 4. 工作流状态错误
+**问题**: 工作流在特定节点失败
+```bash
+# 启用调试模式获取详细日志
+export DEBUG=True
+cd Sample/
+python main.py "Python" --level beginner
+```
+
+#### 5. 批处理内存问题
+**问题**: 批处理操作时内存使用过高
+```bash
+# 使用较小批次或使用 fast_mode 进行开发
+cd Sample/
+python -c "
+import asyncio
+from main import TechLearningAssistant
+
+async def memory_efficient_batch():
+    assistant = TechLearningAssistant()
+    technologies = ['Python', 'JavaScript', 'TypeScript']
+
+    # 逐个处理以限制内存使用
+    for tech in technologies:
+        try:
+            result = await assistant.create_learning_plan(tech, 'beginner', 20)
+            if result['status'] == 'completed':
+                assistant.save_result(result, f'memory_{tech.lower()}.json')
+            print(f'已完成: {tech}')
+        except Exception as e:
+            print(f'{tech} 处理错误: {e}')
+
+asyncio.run(memory_efficient_batch())
+"
+```
+
+### 调试模式功能
+当 `DEBUG=True` 时，系统提供：
+- 详细的 API 请求/响应日志
+- 工作流状态转换跟踪
+- 性能计时信息
+- 带上下文的错误堆栈跟踪
+
+### 获取帮助
+1. 在调试模式下检查错误消息
+2. 使用 `settings.validate_config()` 验证配置
+3. 在运行完整工作流前测试单个组件
+4. 使用 fast_mode 进行开发以隔离网络问题
+
 ## 🔧 高级配置
 
 ### 学习偏好配置
@@ -438,7 +613,15 @@ LangChainLearning/
 
 ## 📝 更新日志
 
-### v2.1.0 (最新) - 2024年12月
+### v2.2.0 (最新) - 2024年12月
+- 📚 **文档全面升级**: 增强 CLAUDE.md 和 README.md，包含完整的开发指南和故障排除
+- 🧪 **测试策略完善**: 新增组件测试、集成测试、调试模式测试的详细指南
+- 🚨 **故障排除指南**: 新增全面的问题诊断和解决方案文档
+- ⚙️ **环境变量扩展**: 从 5 个基础配置扩展到 17 个完整配置选项
+- 🏗️ **架构文档深化**: 新增 LangGraph 状态管理、条件路由逻辑详细说明
+- 🔧 **开发工作流优化**: 完善的快速开发设置和最佳实践指南
+
+### v2.1.0 - 2024年12月
 - 🆕 **新增 Sample/ 目录**: 包含最新版本的项目架构和功能，移除旧的 test/ 目录
 - 🔄 **架构优化**: 重构工作流引擎，提升性能和稳定性
 - 🛠️ **增强配置系统**: 改进的多 LLM 支持，自动故障转移
