@@ -51,7 +51,6 @@ DEEPSEEK_API_KEY=your_deepseek_api_key_here               # 使用DeepSeek时必
 ```
 
 ### 3. 运行示例
-使用虚拟机mini_test
 ```bash
 # 验证配置
 python -c "from config.settings import settings; print('Configuration valid:', settings.validate_config())"

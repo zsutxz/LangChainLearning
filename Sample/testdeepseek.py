@@ -18,7 +18,7 @@ if sys.platform == "win32":
 
 async def test_deepseek_config():
     """测试 DeepSeek 配置"""
-    print("=== DeepSeek API 配置测试 ===\n")
+    print("=== DeepSeek API 配置测试 ===")
 
     # 1. 验证配置
     print("1. 验证环境配置...")
@@ -27,7 +27,7 @@ async def test_deepseek_config():
         return False
 
     # 2. 获取 LLM 配置
-    print("\n2. LLM 配置信息...")
+    print("2. LLM 配置信息...")
     llm_config = settings.get_llm_config()
     print(f"模型: {llm_config.get('model', 'Unknown')}")
     print(f"API Base: {llm_config.get('openai_api_base', 'Default OpenAI')}")
@@ -35,7 +35,7 @@ async def test_deepseek_config():
     print(f"Max Tokens: {llm_config.get('max_tokens', 'Unknown')}")
 
     # 3. 测试 API 连接
-    print("\n3. 测试 API 连接...")
+    print("3. 测试 API 连接...")
     try:
         llm = ChatOpenAI(**llm_config)
 
@@ -52,7 +52,7 @@ async def test_deepseek_config():
         return False
 
 async def test_deepseek_learning():
-    print("=== 测试 DeepSeek Learning ===")
+    print("\n\n=== 测试 DeepSeek Learning ===")
 
     try:
         # 获取配置
@@ -74,7 +74,7 @@ async def test_deepseek_learning():
         """
 
         messages = [HumanMessage(content=test_prompt)]
-        print("\n正在调用 DeepSeek API...")
+        print("正在调用 DeepSeek API...")
         response = await llm.ainvoke(messages)
 
         print("\n=== DeepSeek 回复 ===")
