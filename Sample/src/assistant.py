@@ -5,7 +5,7 @@ import ast
 import json
 from typing import Dict, Any
 
-from .tech_learning_workflow import TechLearningWorkflow
+from .workflow import TechLearningWorkflow
 from config.settings import settings
 
 
