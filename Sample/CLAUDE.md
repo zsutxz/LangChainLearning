@@ -1,60 +1,60 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+本文件为 Claude Code (claude.ai/code) 在此代码库中工作时提供指导。
 
-## Project Overview
+## 🎯 项目概览
 
-This is a **LangGraph-based Intelligent Technical Learning Assistant** (基于LangGraph的智能技术学习助手) - a Python application that automatically collects research on IT technologies and generates personalized learning plans using AI agents.
+这是一个基于 **LangGraph 的智能技术学习助手** - 一个 Python 应用程序，能够自动收集 IT 技术研究并使用 AI 智能体生成个性化学习方案。
 
-## Core Commands
+## 核心命令
 
-### Environment Setup
+### 环境设置
 ```bash
-# Create virtual environment
+# 创建虚拟环境
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# Install dependencies
+# 安装依赖项
 pip install -r requirements.txt
 
-# Configure environment variables
+# 配置环境变量
 cp .env.example .env
-# Edit .env with your API keys
+# 编辑 .env 文件，添加你的 API 密钥
 ```
 
-### Running the Application
+### 运行应用程序
 ```bash
-# Basic usage - generate learning plan
+# 基本用法 - 生成学习方案
 python main.py "Python" --level beginner --hours 30
 
-# Advanced usage with personalization
+# 高级用法 - 个性化设置
 python main.py "Machine Learning" --level advanced --hours 60 --preferences '{"learning_style": "hands-on"}'
 
-# Interactive mode - guided prompts for all inputs
+# 交互模式 - 为所有输入提供引导式提示
 python main.py --interactive
 
-# Save results to file
+# 保存结果到文件
 python main.py "React" --level intermediate --output react_plan.json
 
-# CLI help - see all available options
+# 命令行帮助 - 查看所有可用选项
 python main.py --help
 ```
 
-### Testing and Development
+### 测试和开发
 ```bash
-# Run comprehensive usage examples
+# 运行综合使用示例
 python examples/basic_usage.py
 
-# Test search functionality (if available)
-# python testresearch.py  # Note: This file may not exist in current directory
+# 测试搜索功能（如果可用）
+# python testresearch.py  # 注意：此文件在当前目录中可能不存在
 
-# Test specific LLM configurations
+# 测试特定 LLM 配置
 python testdeepseek.py
 
-# Validate configuration
-python -c "from config.settings import settings; print('Configuration valid:', settings.validate_config())"
+# 验证配置
+python -c "from config.settings import settings; print('配置有效:', settings.validate_config())"
 
-# Test individual components in isolation
+# 单独测试各个组件
 python -c "
 import asyncio
 from src.tech_learning_workflow import TechLearningWorkflow
@@ -62,12 +62,12 @@ from src.tech_learning_workflow import TechLearningWorkflow
 async def test_workflow():
     workflow = TechLearningWorkflow()
     result = await workflow.run('Python', 'beginner', 20)
-    print('Test result:', result['status'])
+    print('测试结果:', result['status'])
 
 asyncio.run(test_workflow())
 "
 
-# Test agent functionality
+# 测试智能体功能
 python -c "
 import asyncio
 from agents.research_agent import ResearchAgent
@@ -75,43 +75,43 @@ from agents.research_agent import ResearchAgent
 async def test_research():
     agent = ResearchAgent()
     result = await agent.research_technology('Python', fast_mode=True)
-    print('Research test:', result['status'])
+    print('研究测试:', result['status'])
 
 asyncio.run(test_research())
 "
 ```
 
-### Configuration Management
+### 配置管理
 ```bash
-# Verify required API keys are set
+# 验证所需的 API 密钥是否已设置
 python -c "from config.settings import settings; exit(0 if settings.validate_config() else 1)"
 
-# Enable debug mode for troubleshooting
+# 启用调试模式进行故障排除
 export DEBUG=True
 python main.py "Python" --level beginner
 ```
 
-## Architecture Overview
+## 架构概览
 
-### Technology Stack
-- **LangGraph**: Workflow orchestration using state machines
-- **LangChain**: LLM framework for AI agent integration
-- **Python 3.8+**: With async/await for concurrent processing
-- **Multiple LLM Support**: OpenAI GPT and DeepSeek API integration
+### 技术栈
+- **LangGraph**: 使用状态机进行工作流编排
+- **LangChain**: 用于 AI 智能体集成的 LLM 框架
+- **Python 3.8+**: 支持异步编程，用于并发处理
+- **多 LLM 支持**: 集成 OpenAI GPT 和 DeepSeek API
 
-### Core Architecture Pattern
+### 核心架构模式
 
-This project uses a **state machine workflow pattern** with sequential processing nodes:
+本项目使用**状态机工作流模式**，包含顺序处理节点：
 
-1. **validate_input** - Parameter validation and normalization
-2. **research_technology** - Multi-source data collection and analysis
-3. **generate_learning_plan** - Base learning plan creation using LLM
-4. **customize_plan** - Personalization based on user preferences (optional)
-5. **generate_final_output** - Result integration and formatting
-6. **handle_error** - Comprehensive error handling and recovery
+1. **validate_input** - 参数验证和规范化
+2. **research_technology** - 多源数据收集和分析
+3. **generate_learning_plan** - 使用 LLM 创建基础学习方案
+4. **customize_plan** - 基于用户偏好进行个性化（可选）
+5. **generate_final_output** - 结果集成和格式化
+6. **handle_error** - 全面的错误处理和恢复
 
-### Detailed LangGraph State Management
-The `WorkflowState` TypedDict defines the complete data contract:
+### 详细的 LangGraph 状态管理
+`WorkflowState` TypedDict 定义了完整的数据契约：
 ```python
 class WorkflowState(TypedDict):
     messages: Annotated[list, add_messages]
@@ -125,12 +125,12 @@ class WorkflowState(TypedDict):
     status: str
 ```
 
-### LangGraph Workflow Design
-The workflow uses conditional routing for personalization:
+### LangGraph 工作流设计
+工作流使用条件路由进行个性化：
 ```python
 workflow.add_conditional_edges(
     "generate_learning_plan",
-    self._should_customize,  # Routes based on preferences existence
+    self._should_customize,  # 根据偏好存在性进行路由
     {
         "customize": "customize_plan",
         "finalize": "generate_final_output"
@@ -138,41 +138,41 @@ workflow.add_conditional_edges(
 )
 ```
 
-### Fast Mode Implementation
-The research agent supports a `fast_mode=True` parameter that skips network searches and provides mock data for development/testing.
+### 快速模式实现
+研究智能体支持 `fast_mode=True` 参数，跳过网络搜索，为开发/测试提供模拟数据。
 
-### Key Components
+### 关键组件
 
 #### TechLearningWorkflow (src/tech_learning_workflow.py:41)
-The main LangGraph workflow engine that orchestrates the entire learning plan generation process through a state machine. Uses StateGraph to manage sequential processing and conditional routing.
+主要的 LangGraph 工作流引擎，通过状态机编排整个学习方案生成过程。使用 StateGraph 管理顺序处理和条件路由。
 
-#### Agent Collaboration Pattern
-- **ResearchAgent** (agents/research_agent.py): Coordinates WebSearcher and ContentAnalyzer for comprehensive data collection
-- **LearningAgent** (agents/learning_agent.py): Generates personalized learning plans based on research results
-- **State Management**: WorkflowState passes structured data between agents
+#### 智能体协作模式
+- **ResearchAgent** (agents/research_agent.py): 协调 WebSearcher 和 ContentAnalyzer 进行全面数据收集
+- **LearningAgent** (agents/learning_agent.py): 基于研究结果生成个性化学习方案
+- **状态管理**: WorkflowState 在智能体之间传递结构化数据
 
-#### Multi-Source Research System
-- **WebSearcher** (tools/web_searcher.py): Concurrent search across Google, ArXiv papers, and RSS feeds
-- **ContentAnalyzer** (tools/content_analyzer.py): Content analysis and key concept extraction
+#### 多源研究系统
+- **WebSearcher** (tools/web_searcher.py): 并发搜索 Google、ArXiv 论文和 RSS 订阅
+- **ContentAnalyzer** (tools/content_analyzer.py): 内容分析和关键概念提取
 
-#### Configuration System (config/settings.py)
-- **Multi-LLM Support**: OpenAI GPT and DeepSeek API with automatic fallback
-- **Environment-based Configuration**: All settings through .env variables
-- **Validation System**: Configuration validation with clear error messages
+#### 配置系统 (config/settings.py)
+- **多 LLM 支持**: OpenAI GPT 和 DeepSeek API，具有自动回退功能
+- **基于环境的配置**: 所有设置通过 .env 变量
+- **验证系统**: 配置验证，带有清晰的错误消息
 
-## Development Patterns
+## 开发模式
 
-### Async Processing Pattern
-All components use asyncio for high-performance concurrent operations:
+### 异步处理模式
+所有组件使用 asyncio 进行高性能并发操作：
 ```python
 async def research_technology(self, technology: str):
-    # Concurrent web search and content analysis
+    # 并发网络搜索和内容分析
     results = await self.web_searcher.comprehensive_search(query)
     analysis = self.content_analyzer.analyze_content(results)
 ```
 
-### State Management Pattern
-WorkflowState TypedDict defines the contract for data passing between workflow nodes:
+### 状态管理模式
+WorkflowState TypedDict 定义了在工作流节点间传递数据的契约：
 ```python
 class WorkflowState(TypedDict):
     technology: str
@@ -181,42 +181,42 @@ class WorkflowState(TypedDict):
     preferences: Dict[str, Any]
     research_results: Optional[Dict[str, Any]]
     learning_plan: Optional[Dict[str, Any]]
-    # ... other fields
+    # ... 其他字段
 ```
 
-### Error Handling Pattern
-Comprehensive error handling with graceful fallbacks through dedicated error handling nodes in the workflow.
+### 错误处理模式
+通过工作流中专用错误处理节点实现全面错误处理和优雅回退。
 
-## Required Environment Variables
+## 所需环境变量
 
 ```bash
-# Required
-OPENAI_API_KEY=your_openai_api_key_here
+# 必需
+OPENAI_API_KEY=你的_openai_api_key
 
-# Optional for enhanced functionality
-SERPER_API_KEY=your_serper_api_key_here          # For Google web search
-ANTHROPIC_API_KEY=your_anthropic_api_key_here    # Alternative LLM support
-USE_DEEPSEEK=true                                # Enable DeepSeek API
-DEEPSEEK_API_KEY=your_deepseek_api_key_here      # DeepSeek API key
+# 可选，用于增强功能
+SERPER_API_KEY=你的_serper_api_key          # 用于 Google 网络搜索
+ANTHROPIC_API_KEY=你的_anthropic_api_key    # 备用 LLM 支持
+USE_DEEPSEEK=true                            # 启用 DeepSeek API
+DEEPSEEK_API_KEY=你的_deepseek_api_key      # DeepSeek API 密钥
 ```
 
-## Key Dependencies
+## 关键依赖项
 
-- **langgraph>=0.2.0** - Workflow orchestration and state management
-- **langchain>=0.2.0** - LLM framework
-- **langchain-openai>=0.1.0** - OpenAI integration
-- **langchain-community>=0.2.0** - Community tools and integrations
-- **asyncio, aiohttp** - Async processing for performance
-- **requests, beautifulsoup4** - Web scraping capabilities
-- **python-dotenv** - Environment variable management
-- **arxiv>=2.0.0** - Academic paper search
-- **feedparser>=6.0.0** - RSS feed processing
-- **lxml>=4.9.0** - XML/HTML parsing
-- **pandas>=2.0.0** - Data manipulation and analysis
+- **langgraph>=0.2.0** - 工作流编排和状态管理
+- **langchain>=0.2.0** - LLM 框架
+- **langchain-openai>=0.1.0** - OpenAI 集成
+- **langchain-community>=0.2.0** - 社区工具和集成
+- **asyncio, aiohttp** - 用于性能的异步处理
+- **requests, beautifulsoup4** - 网络爬虫功能
+- **python-dotenv** - 环境变量管理
+- **arxiv>=2.0.0** - 学术论文搜索
+- **feedparser>=6.0.0** - RSS 订阅处理
+- **lxml>=4.9.0** - XML/HTML 解析
+- **pandas>=2.0.0** - 数据操作和分析
 
-## Usage Examples
+## 使用示例
 
-### Programming Interface
+### 编程接口
 ```python
 from main import TechLearningAssistant
 import asyncio
@@ -237,178 +237,178 @@ async def create_learning_plan():
         assistant.save_result(result)
     return result
 
-# Execute
+# 执行
 result = asyncio.run(create_learning_plan())
 ```
 
-### Customization Options
+### 自定义选项
 ```python
 preferences = {
     "learning_style": "visual|hands-on|theoretical",
     "preferred_time": "morning|evening|flexible",
-    "focus": ["specific_topics"],
-    "tools": ["preferred_tools"],
+    "focus": ["特定主题"],
+    "tools": ["首选工具"],
     "project_type": "personal|professional|research",
-    "background": "user_background"
+    "background": "用户背景"
 }
 ```
 
-## Common Development Tasks
+## 常见开发任务
 
-### Adding New Search Sources
-Extend the WebSearcher class with new search methods:
+### 添加新搜索源
+用新搜索方法扩展 WebSearcher 类：
 ```python
 async def search_new_source(self, query: str) -> List[Dict[str, Any]]:
-    """Add new search source implementation"""
-    # Implement new search source logic
+    """添加新搜索源实现"""
+    # 实现新搜索源逻辑
     pass
 ```
 
-### Customizing Learning Plan Generation
-Modify the LearningAgent prompt templates and generation logic:
+### 自定义学习方案生成
+修改 LearningAgent 提示模板和生成逻辑：
 ```python
 def generate_learning_plan(self, technology: str, analysis: Dict[str, Any],
                          duration_hours: int = None, experience_level: str = "beginner"):
-    """Customize learning plan generation logic"""
-    # Modify prompt templates and generation approach
+    """自定义学习方案生成逻辑"""
+    # 修改提示模板和生成方法
     pass
 ```
 
-### Extending the LangGraph Workflow
-Add new processing nodes to the workflow:
+### 扩展 LangGraph 工作流
+向工作流添加新处理节点：
 ```python
 def _create_workflow(self) -> StateGraph:
-    """Extend workflow with additional processing steps"""
+    """用额外处理步骤扩展工作流"""
     workflow = StateGraph(WorkflowState)
 
-    # Add new node
+    # 添加新节点
     workflow.add_node("new_processing_step", self._new_processing_step)
 
-    # Update workflow edges
+    # 更新工作流边
     workflow.add_edge("research_technology", "new_processing_step")
     workflow.add_edge("new_processing_step", "generate_learning_plan")
 
     return workflow.compile()
 ```
 
-## Debugging and Troubleshooting
+## 调试和故障排除
 
-### Common Issues
-1. **API Key Configuration**: Use `settings.validate_config()` to verify setup
-2. **Search Result Quality**: Check SERPER_API_KEY for Google search functionality
-3. **LLM Performance**: Test both OpenAI and DeepSeek configurations using testdeepseek.py
-4. **Async Issues**: Ensure all async functions are properly awaited
+### 常见问题
+1. **API 密钥配置**: 使用 `settings.validate_config()` 验证设置
+2. **搜索结果质量**: 检查 SERPER_API_KEY 以获得 Google 搜索功能
+3. **LLM 性能**: 使用 testdeepseek.py 测试 OpenAI 和 DeepSeek 配置
+4. **异步问题**: 确保所有异步函数都被正确等待
 
-### Debug Mode
+### 调试模式
 ```bash
 export DEBUG=True
 python main.py "Python" --level beginner
 ```
 
-### Test Components Individually
+### 单独测试组件
 ```bash
-# Test research component (if available)
-# python testresearch.py  # Note: This file may not exist in current directory
+# 测试研究组件（如果可用）
+# python testresearch.py  # 注意：此文件在当前目录中可能不存在
 
-# Test LLM configuration
+# 测试 LLM 配置
 python testdeepseek.py
 ```
 
-### Advanced Debugging Techniques
+### 高级调试技术
 
-#### Workflow State Inspection
+#### 工作流状态检查
 ```python
-# Debug workflow state transitions
+# 调试工作流状态转换
 python -c "
 import asyncio
 from src.tech_learning_workflow import TechLearningWorkflow
 
 async def debug_workflow():
     workflow = TechLearningWorkflow()
-    # Enable step-by-step execution
+    # 启用逐步执行
     result = await workflow.run('Python', 'beginner', 20)
-    print('Full state:', result)
+    print('完整状态:', result)
 
 asyncio.run(debug_workflow())
 "
 ```
 
-#### Agent-Specific Testing
+#### 特定智能体测试
 ```python
-# Test research agent in isolation
+# 单独测试研究智能体
 python -c "
 import asyncio
 from agents.research_agent import ResearchAgent
 
 async def debug_research():
     agent = ResearchAgent()
-    # Test with fast mode to avoid network issues
+    # 使用快速模式避免网络问题
     result = await agent.research_technology('Python', fast_mode=True)
-    print('Research result keys:', list(result.keys()))
+    print('研究结果键:', list(result.keys()))
 
 asyncio.run(debug_research())
 "
 ```
 
-#### Configuration Validation
+#### 配置验证
 ```bash
-# Comprehensive configuration check
+# 全面配置检查
 python -c "
 from config.settings import settings
-print('OpenAI Key:', bool(settings.OPENAI_API_KEY))
-print('DeepSeek Key:', bool(settings.DEEPSEEK_API_KEY))
-print('Use DeepSeek:', settings.USE_DEEPSEEK)
-print('Serper Key:', bool(settings.SERPER_API_KEY))
-print('Config Valid:', settings.validate_config())
+print('OpenAI 密钥:', bool(settings.OPENAI_API_KEY))
+print('DeepSeek 密钥:', bool(settings.DEEPSEEK_API_KEY))
+print('使用 DeepSeek:', settings.USE_DEEPSEEK)
+print('Serper 密钥:', bool(settings.SERPER_API_KEY))
+print('配置有效:', settings.validate_config())
 "
 ```
 
-### Performance Optimization
+### 性能优化
 ```bash
-# Test with fast mode for development
+# 使用快速模式进行开发测试
 python -c "
 import asyncio
 from main import TechLearningAssistant
 
 async def fast_mode_test():
     assistant = TechLearningAssistant()
-    # Mock data for faster development
+    # 使用模拟数据加快开发速度
     result = await assistant.create_learning_plan('Python', 'beginner', 20)
-    print('Fast mode test completed')
+    print('快速模式测试完成')
 
 asyncio.run(fast_mode_test())
 "
 ```
 
-## Development Best Practices
+## 开发最佳实践
 
-### Fast Mode Development
-For rapid development and testing, use the built-in fast mode capabilities:
-- **ResearchAgent.fast_mode=True**: Skips network searches, returns mock data
-- **Workflow Testing**: Test workflow logic without external dependencies
-- **Component Isolation**: Test individual agents without full workflow execution
+### 快速模式开发
+为快速开发和测试，使用内置的快速模式功能：
+- **ResearchAgent.fast_mode=True**: 跳过网络搜索，返回模拟数据
+- **工作流测试**: 在没有外部依赖的情况下测试工作流逻辑
+- **组件隔离**: 在不执行完整工作流的情况下测试单个智能体
 
-### Environment Configuration
-- **Development**: Set `DEBUG=True` for detailed logging
-- **Testing**: Use `fast_mode=True` to avoid rate limits and network dependencies
-- **Production**: Ensure all API keys are properly configured and validated
+### 环境配置
+- **开发**: 设置 `DEBUG=True` 进行详细日志记录
+- **测试**: 使用 `fast_mode=True` 避免速率限制和网络依赖
+- **生产**: 确保所有 API 密钥都正确配置和验证
 
-### Performance Considerations
-- **Async Processing**: All I/O operations are async for performance
-- **Concurrent Searches**: Multiple search sources run concurrently
-- **Error Recovery**: Graceful degradation when external services fail
+### 性能考虑
+- **异步处理**: 所有 I/O 操作都是异步的，以提高性能
+- **并发搜索**: 多个搜索源并发运行
+- **错误恢复**: 当外部服务失败时优雅降级
 
-### Git Configuration
-Note that test files are excluded from version control:
+### Git 配置
+注意测试文件被排除在版本控制之外：
 ```bash
-# Test files are ignored by .gitignore
+# 测试文件被 .gitignore 忽略
 test_*.py
 *_test.py
 debug_*.py
 ```
 
-### Development Workflow
-1. **Setup**: Validate configuration with `settings.validate_config()`
-2. **Development**: Use fast mode and debug logging for rapid iteration
-3. **Testing**: Test components individually before integration
-4. **Validation**: Run full workflow with real APIs before deployment
+### 开发工作流
+1. **设置**: 使用 `settings.validate_config()` 验证配置
+2. **开发**: 使用快速模式和调试日志进行快速迭代
+3. **测试**: 在集成前单独测试组件
+4. **验证**: 在部署前使用真实 API 运行完整工作流
