@@ -271,12 +271,33 @@ def main():
         sys.exit(1)
 
     try:
+        # 设置事件循环策略以改善Windows兼容性
+        if sys.platform == "win32":
+            asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+
+        # 运行主程序
         asyncio.run(cli_mode())
     except KeyboardInterrupt:
         print("\n用户中断，退出程序")
+        sys.exit(0)  # 正常退出码
+    except asyncio.CancelledError:
+        print("\n异步任务被取消，退出程序")
+        sys.exit(0)
     except Exception as e:
         print(f"程序执行失败: {e}")
+        if settings.DEBUG:
+            import traceback
+            traceback.print_exc()
         sys.exit(1)
+    finally:
+        # 清理资源
+        try:
+            # 关闭可能的事件循环
+            loop = asyncio.get_event_loop()
+            if loop and not loop.is_closed():
+                loop.close()
+        except:
+            pass
 
 
 if __name__ == "__main__":
