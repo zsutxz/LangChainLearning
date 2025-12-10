@@ -234,10 +234,10 @@ async def cli_mode():
     import argparse
 
     parser = argparse.ArgumentParser(description="技术学习助手")
-    parser.add_argument("technology", help="要学习的技术名称")
-    parser.add_argument("--level", choices=["beginner", "intermediate", "advanced"],
+    parser.add_argument("technology", default="langchain agent",help="要学习的技术名称")
+    parser.add_argument("--level",  choices=["beginner", "intermediate", "advanced"],
                        default="beginner", help="经验水平")
-    parser.add_argument("--hours", type=int, help="学习时长(小时)")
+    parser.add_argument("--hours", default=30, type=int, help="学习时长(小时)")
     parser.add_argument("--preferences", help="JSON格式的学习偏好")
     parser.add_argument("--output", help="输出文件名")
     parser.add_argument("--interactive", action="store_true", help="交互模式")

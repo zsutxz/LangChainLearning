@@ -1,0 +1,79 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug main.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Sample/main.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/Sample",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/Sample"
+            },
+            "args": ["langchain agent", "--level", "beginner", "--hours", "30"],
+            "stopOnEntry": false,
+            "justMyCode": true,
+            "subProcess": false
+        },
+        {
+            "name": "Debug main.py (Interactive)",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Sample/main.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/Sample",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/Sample"
+            },
+            "args": ["--interactive"],
+            "stopOnEntry": false,
+            "justMyCode": true,
+            "subProcess": false
+        },
+        {
+            "name": "Debug main.py (Custom Args)",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Sample/main.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/Sample",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/Sample"
+            },
+            "args": [],
+            "stopOnEntry": false,
+            "justMyCode": true,
+            "subProcess": false
+        },
+        {
+            "name": "Debug TechLearningWorkflow",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/Sample/debug_workflow.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/Sample",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/Sample",
+                "DEBUG": "true"
+            },
+            "stopOnEntry": false,
+            "justMyCode": true,
+            "subProcess": false
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/Sample",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/Sample"
+            },
+            "stopOnEntry": false,
+            "justMyCode": true,
+            "subProcess": false
+        }
+    ]
+}

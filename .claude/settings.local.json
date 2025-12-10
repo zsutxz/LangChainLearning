@@ -3,7 +3,8 @@
     "allow": [
       "Bash(git commit:*)",
       "Bash(git add:*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(python:*)"
     ],
     "deny": [],
     "ask": []
