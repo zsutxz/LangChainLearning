@@ -55,7 +55,6 @@ env.bak/
 venv.bak/
 
 # IDEs
-.vscode/
 .idea/
 *.swp
 *.swo
@@ -98,3 +97,4 @@ sensitive/
 *.tmp
 *.temp
 *.bak
+.claude/settings.local.json

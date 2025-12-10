@@ -122,7 +122,7 @@ class TechLearningWorkflow:
         try:
             technology = state["technology"]
             # 默认使用快速模式避免网络问题
-            research_results = await self.research_agent.research_technology(technology, fast_mode=True)
+            research_results = await self.research_agent.research_technology(technology, fast_mode=False)
 
             if research_results["status"] == "no_results":
                 return {

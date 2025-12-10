@@ -166,10 +166,10 @@ class WebSearcher:
                     })
                 return results
 
-            # 设置10秒超时
+            # 设置30秒超时
             results = await asyncio.wait_for(
                 asyncio.get_event_loop().run_in_executor(None, _search_arxiv),
-                timeout=10.0
+                timeout=30.0
             )
             return results
         except asyncio.TimeoutError:
@@ -182,43 +182,69 @@ class WebSearcher:
     async def search_tech_blogs(self, query: str) -> List[Dict[str, Any]]:
         """搜索技术博客"""
         blog_feeds = [
-            "https://feeds.feedburner.com/oreilly/radar",
-            "https://martinfowler.com/feed.atom",
-            "https://danielabaron.me/feed/",
-            # 可以添加更多RSS源
+            # 高优先级：经过验证的稳定源
+            "https://martinfowler.com/feed.atom",  # 软件架构权威（已验证可用）
+            "https://realpython.com/atom.xml",  # Python教程网站（已验证可用）
+
+            # 国内优质源（按可靠性排序）
+            "https://www.infoq.cn/feed",  # InfoQ中文 - 优质技术内容
+            "https://www.cnblogs.com/rss",  # 博客园 - 国内知名技术博客平台
+            "https://segmentfault.com/rss",  # SegmentFault思否 - 技术问答社区
+            "https://www.oschina.net/rss",  # 开源中国 - 开源技术资讯
+
+            # 大厂技术博客（可能有访问限制，但内容质量高）
+            "https://cloud.tencent.com/developer/rss",  # 腾讯云开发者
+            "https://developer.aliyun.com/rss",  # 阿里云开发者
+            "https://juejin.cn/rss",  # 掘金 - 字节跳动技术社区
+
+            # 备用国际源（可能较慢）
+            # "https://www.python.org/dev/peps/peps.rss",  # Python官方PEP（有时超时）
+            # "https://djangoproject.com/rss/weblog/",  # Django官方博客（有时超时）
         ]
 
         async def _fetch_feed(feed_url):
             try:
                 def _parse_feed():
-                    feed = feedparser.parse(feed_url)
-                    results = []
-                    for entry in feed.entries:
-                        if query.lower() in entry.title.lower() or query.lower() in entry.summary.lower():
-                            results.append({
-                                "title": entry.title,
-                                "link": entry.link,
-                                "summary": entry.summary[:200] + "..." if len(entry.summary) > 200 else entry.summary,
-                                "published": entry.get("published", ""),
-                                "source": "blog"
-                            })
-                    return results
+                    try:
+                        feed = feedparser.parse(feed_url)
+                        results = []
+                        for entry in feed.entries:
+                            if query.lower() in entry.title.lower() or query.lower() in entry.summary.lower():
+                                results.append({
+                                    "title": entry.title,
+                                    "link": entry.link,
+                                    "summary": entry.summary[:200] + "..." if len(entry.summary) > 200 else entry.summary,
+                                    "published": entry.get("published", ""),
+                                    "source": "blog"
+                                })
+                        return results
+                    except Exception as e:
+                        print(f"RSS解析内部错误 {feed_url}: {e}")
+                        return []
 
-                # 设置5秒超时
+                # 设置5秒超时，使用更安全的执行器
+                loop = asyncio.get_event_loop()
                 return await asyncio.wait_for(
-                    asyncio.get_event_loop().run_in_executor(None, _parse_feed),
+                    loop.run_in_executor(None, _parse_feed),
                     timeout=5.0
                 )
             except asyncio.TimeoutError:
                 print(f"RSS源超时 {feed_url}")
                 return []
+            except asyncio.CancelledError:
+                print(f"RSS任务被取消 {feed_url}")
+                return []
             except Exception as e:
                 print(f"RSS源解析失败 {feed_url}: {e}")
                 return []
 
-        # 并行获取所有RSS源
-        tasks = [_fetch_feed(feed_url) for feed_url in blog_feeds]
-        feed_results = await asyncio.gather(*tasks, return_exceptions=True)
+        # 并行获取所有RSS源，增加取消处理
+        try:
+            tasks = [_fetch_feed(feed_url) for feed_url in blog_feeds]
+            feed_results = await asyncio.gather(*tasks, return_exceptions=True)
+        except asyncio.CancelledError:
+            print("RSS搜索任务被取消")
+            return []
 
         results = []
         for feed_result in feed_results:

@@ -1,0 +1,35 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}/Sample/venv/Scripts/python.exe",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.formatting.provider": "black",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/venv": true,
+        "**/env": true,
+        "**/.pytest_cache": true
+    },
+    "terminal.integrated.cwd": "${workspaceFolder}/Sample",
+    "launch": {
+        "configurations": [
+            {
+                "name": "Debug Async Python",
+                "type": "python",
+                "request": "launch",
+                "program": "${workspaceFolder}/Sample/main.py",
+                "console": "integratedTerminal",
+                "cwd": "${workspaceFolder}/Sample",
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}/Sample",
+                    "ASYNCIO_DEBUG": "1"
+                },
+                "stopOnEntry": false,
+                "justMyCode": true,
+                "subProcess": false
+            }
+        ]
+    }
+}
