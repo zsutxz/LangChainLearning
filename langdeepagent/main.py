@@ -16,6 +16,16 @@ from src.agent import EnglishLearningAgent
 from config import settings
 
 
+def safe_print(message: str):
+    """安全打印消息，处理Unicode编码问题"""
+    try:
+        print(message)
+    except UnicodeEncodeError:
+        # 移除或替换无法编码的字符
+        clean_message = message.encode('ascii', 'ignore').decode('ascii')
+        print(clean_message)
+
+
 class LangDeepAgentCLI:
     """LangDeepAgent 命令行界面"""
 
@@ -35,7 +45,7 @@ class LangDeepAgentCLI:
                 study_duration_weeks=args.duration
             )
 
-            print("🎯 学习计划生成成功！")
+            safe_print("🎯 学习计划生成成功！")
             print("=" * 60)
             print(f"用户ID: {plan.user_id}")
             print(f"当前水平: {plan.current_level}")
@@ -44,12 +54,12 @@ class LangDeepAgentCLI:
             print(f"计划ID: {plan.plan_id}")
             print("=" * 60)
 
-            print("\n📚 总体目标:")
+            safe_print("\n📚 总体目标:")
             for i, goal in enumerate(plan.overall_goals, 1):
                 print(f"{i}. {goal}")
 
-            print(f"\n📅 学习期限: {len(plan.milestones)} 周")
-            print("🌟 推荐资源:")
+            print(f"\n学习期限: {len(plan.milestones)} 周")
+            safe_print("🌟 推荐资源:")
             resources = plan.resources
             if resources.textbooks:
                 print(f"  教材: {', '.join(resources.textbooks)}")
@@ -61,7 +71,10 @@ class LangDeepAgentCLI:
             return plan
 
         except Exception as e:
-            print(f"❌ 创建学习计划失败: {str(e)}")
+            try:
+                print(f"❌ 创建学习计划失败: {str(e)}")
+            except UnicodeEncodeError:
+                print("创建学习计划失败: " + str(e).encode('ascii', 'ignore').decode('ascii'))
             return None
 
     async def assess_command(self, args):
@@ -113,7 +126,10 @@ class LangDeepAgentCLI:
             return assessment
 
         except Exception as e:
-            print(f"❌ 水平评估失败: {str(e)}")
+            try:
+                print(f"❌ 水平评估失败: {str(e)}")
+            except UnicodeEncodeError:
+                print("水平评估失败: " + str(e).encode('ascii', 'ignore').decode('ascii'))
             return None
 
     async def vocabulary_command(self, args):
@@ -152,7 +168,10 @@ class LangDeepAgentCLI:
             return session
 
         except Exception as e:
-            print(f"❌ 词汇学习失败: {str(e)}")
+            try:
+                print(f"❌ 词汇学习失败: {str(e)}")
+            except UnicodeEncodeError:
+                print("词汇学习失败: " + str(e).encode('ascii', 'ignore').decode('ascii'))
             return None
 
     async def conversation_command(self, args):
@@ -196,7 +215,10 @@ class LangDeepAgentCLI:
             return session
 
         except Exception as e:
-            print(f"❌ 对话练习失败: {str(e)}")
+            try:
+                print(f"❌ 对话练习失败: {str(e)}")
+            except UnicodeEncodeError:
+                print("对话练习失败: " + str(e).encode('ascii', 'ignore').decode('ascii'))
             return None
 
     async def progress_command(self, args):
@@ -240,7 +262,10 @@ class LangDeepAgentCLI:
             return report
 
         except Exception as e:
-            print(f"❌ 进度查询失败: {str(e)}")
+            try:
+                print(f"❌ 进度查询失败: {str(e)}")
+            except UnicodeEncodeError:
+                print("进度查询失败: " + str(e).encode('ascii', 'ignore').decode('ascii'))
             return None
 
     async def interactive_mode(self):
@@ -333,8 +358,12 @@ async def main():
     """主函数"""
     # 验证配置
     if not settings.validate_config():
-        print("❌ 配置验证失败，请检查 .env 文件")
-        print("确保设置了有效的 DEEPSEEK_API_KEY 或 OPENAI_API_KEY")
+        try:
+            print("❌ 配置验证失败，请检查 .env 文件")
+            print("确保设置了有效的 DEEPSEEK_API_KEY 或 OPENAI_API_KEY")
+        except UnicodeEncodeError:
+            print("配置验证失败，请检查 .env 文件")
+            print("确保设置了有效的 DEEPSEEK_API_KEY 或 OPENAI_API_KEY")
         sys.exit(1)
 
     parser = argparse.ArgumentParser(description="LangDeepAgent - 英语学习 AI 助手")
@@ -403,7 +432,10 @@ async def main():
     except KeyboardInterrupt:
         print("\n👋 用户中断，程序退出")
     except Exception as e:
-        print(f"❌ 程序执行失败: {str(e)}")
+        try:
+            print(f"❌ 程序执行失败: {str(e)}")
+        except UnicodeEncodeError:
+            print("程序执行失败: " + str(e).encode('ascii', 'ignore').decode('ascii'))
         if settings.DEBUG:
             import traceback
             traceback.print_exc()
