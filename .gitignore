@@ -98,3 +98,4 @@ sensitive/
 *.temp
 *.bak
 .claude/settings.local.json
+*.envlangdeepagent/.env
