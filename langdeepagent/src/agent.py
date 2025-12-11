@@ -9,10 +9,11 @@ from typing import List, Dict, Any, Optional
 
 from langchain_openai import ChatOpenAI
 from langgraph.graph import StateGraph, END
+from langgraph.graph.message import add_messages
 from typing_extensions import Annotated, TypedDict
 
-from ..config import settings, ENGLISH_LEARNING_PROMPTS
-from .models import (
+from config import settings, ENGLISH_LEARNING_PROMPTS
+from src.models import (
     UserProfile,
     LearningPlan,
     VocabularySession,
